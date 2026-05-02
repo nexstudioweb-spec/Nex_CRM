@@ -1,0 +1,2308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Nex CRM">
+<meta name="theme-color" content="#0a0c0f">
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<title>Nex Studio — Caller CRM</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+:root{
+  --bg:#0a0c0f;--bg2:#111318;--bg3:#181c23;--bg4:#1e2330;
+  --border:#252a36;--border2:#2e3545;
+  --text:#e8eaf0;--text2:#8b92a8;--text3:#5a6070;
+  --accent:#4f8ef7;--accent2:#6ee7b7;--warn:#f59e0b;
+  --danger:#ef4444;--success:#22c55e;--purple:#a78bfa;--pink:#f472b6;
+  --radius:10px;--radius2:14px;
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+  --nav-h:62px;--header-h:54px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:14px;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+::-webkit-scrollbar{width:3px;height:3px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* ── INSTALL BANNER ── */
+#installBanner{display:none;position:fixed;bottom:calc(var(--nav-h)+var(--safe-bottom)+10px);left:12px;right:12px;background:var(--bg2);border:1px solid var(--accent);border-radius:var(--radius2);padding:12px 14px;z-index:9000;box-shadow:0 8px 32px rgba(0,0,0,.6);animation:slideUp .3s ease}
+#installBanner.show{display:flex;align-items:center;gap:10px}
+.install-icon{font-size:26px;flex-shrink:0}
+.install-text{flex:1;min-width:0}
+.install-text strong{display:block;font-size:13px;font-weight:600}
+.install-text span{font-size:11px;color:var(--text3)}
+.install-btns{display:flex;gap:6px;flex-shrink:0}
+.btn-install{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:7px 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer}
+.btn-dismiss{background:transparent;border:1px solid var(--border2);color:var(--text3);border-radius:8px;padding:7px 9px;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer}
+#iosHint{display:none;position:fixed;bottom:calc(var(--nav-h)+var(--safe-bottom)+10px);left:12px;right:12px;background:var(--bg2);border:1px solid var(--accent);border-radius:var(--radius2);padding:12px 14px;z-index:9000;font-size:12px;color:var(--text2);line-height:1.5}
+#iosHint.show{display:block}
+#iosHint strong{color:var(--accent)}
+
+/* ── LOGIN ── */
+#loginScreen{min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(ellipse at 30% 20%,#1a2040 0%,var(--bg) 60%);position:relative;overflow:hidden;padding:20px 20px calc(20px + var(--safe-bottom));padding-top:calc(20px + var(--safe-top))}
+#loginScreen::before{content:'';position:absolute;width:400px;height:400px;background:radial-gradient(circle,rgba(79,142,247,.07) 0%,transparent 70%);top:-80px;left:-80px;border-radius:50%;pointer-events:none}
+#loginScreen::after{content:'';position:absolute;width:300px;height:300px;background:radial-gradient(circle,rgba(110,231,183,.05) 0%,transparent 70%);bottom:-40px;right:-40px;border-radius:50%;pointer-events:none}
+.login-box{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:32px 24px;width:100%;max-width:400px;position:relative;z-index:1;box-shadow:0 32px 80px rgba(0,0,0,.5)}
+.login-logo{font-size:22px;font-weight:600;letter-spacing:-.5px;margin-bottom:4px}
+.login-logo span{color:var(--accent)}
+.login-sub{color:var(--text3);font-size:13px;margin-bottom:28px}
+.login-tabs{display:flex;background:var(--bg3);border-radius:var(--radius);padding:3px;margin-bottom:24px}
+.login-tab{flex:1;padding:10px;text-align:center;font-size:13px;font-weight:500;cursor:pointer;border-radius:8px;color:var(--text2);transition:all .2s}
+.login-tab.active{background:var(--bg4);color:var(--text)}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:12px;color:var(--text2);margin-bottom:6px;font-weight:500}
+.field input,.field select{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:16px;outline:none;transition:border-color .2s;-webkit-appearance:none;appearance:none}
+.field input:focus,.field select:focus{border-color:var(--accent)}
+.field select option{background:var(--bg2)}
+.btn-primary{width:100%;background:var(--accent);color:#fff;border:none;border-radius:var(--radius);padding:14px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:opacity .2s,transform .1s;letter-spacing:.2px}
+.btn-primary:active{transform:scale(.98);opacity:.85}
+.login-err{color:var(--danger);font-size:12px;text-align:center;margin-top:12px;min-height:18px}
+
+/* ── DESKTOP SIDEBAR APP ── */
+#app{display:none;min-height:100vh}
+#app.visible{display:block}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:220px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:20px 0 0;z-index:100;overflow:hidden}
+.sidebar-logo{padding:0 20px 20px;font-size:17px;font-weight:600;letter-spacing:-.3px;border-bottom:1px solid var(--border);margin-bottom:12px}
+.sidebar-logo span{color:var(--accent)}
+.sidebar-user{padding:0 20px 16px;border-bottom:1px solid var(--border);margin-bottom:12px}
+.sidebar-user-name{font-size:13px;font-weight:500}
+.sidebar-user-role{font-size:11px;color:var(--text3);margin-top:2px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 20px;cursor:pointer;font-size:13px;font-weight:500;color:var(--text2);transition:all .15s;border-left:2px solid transparent}
+.nav-item:hover{color:var(--text);background:var(--bg3)}
+.nav-item.active{color:var(--accent);border-left-color:var(--accent);background:rgba(79,142,247,.07)}
+.nav-icon{width:16px;height:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.nav-icon svg{width:16px;height:16px;display:block}
+#navItems{overflow-y:auto;flex:1}
+.sidebar-bottom{padding:14px 16px 18px;border-top:1px solid var(--border);flex-shrink:0}
+.btn-logout{width:100%;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);color:var(--danger);border-radius:var(--radius);padding:11px 14px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:.2px}
+.btn-logout:hover{background:rgba(239,68,68,.18);border-color:var(--danger);box-shadow:0 0 12px rgba(239,68,68,.2);transform:translateY(-1px)}
+.btn-logout:active{transform:scale(.97);opacity:.85}
+.main-content-desk{margin-left:220px;padding:28px 32px;min-height:100vh}
+
+/* ── MOBILE LAYOUT ── */
+#appMobile{display:none;height:100dvh;flex-direction:column}
+#appMobile.visible{display:flex}
+.app-header{position:fixed;top:0;left:0;right:0;height:calc(var(--header-h) + var(--safe-top));padding-top:var(--safe-top);background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding-left:16px;padding-right:16px;z-index:200}
+.header-logo{font-size:17px;font-weight:600;letter-spacing:-.3px}
+.header-logo span{color:var(--accent)}
+.header-right{display:flex;align-items:center;gap:8px}
+.header-avatar{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.header-name{font-size:12px;font-weight:500}
+.btn-header-logout{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:var(--danger);border-radius:8px;padding:6px 11px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:.2px}
+.btn-header-logout:active{opacity:.7;transform:scale(.95)}
+.mob-main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:calc(var(--header-h) + var(--safe-top)) 0 calc(var(--nav-h) + var(--safe-bottom) + 4px);overscroll-behavior-y:contain}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;height:calc(var(--nav-h) + var(--safe-bottom));padding-bottom:var(--safe-bottom);background:var(--bg2);border-top:1px solid var(--border);display:flex;align-items:flex-start;z-index:200}
+.bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 2px 6px;cursor:pointer;color:var(--text3);transition:color .2s;gap:4px;position:relative}
+.bnav-item.active{color:var(--accent)}
+.bnav-item.active .bnav-icon-wrap{background:rgba(79,142,247,.12);border-radius:10px}
+.bnav-item:active{opacity:.6;transform:scale(.92)}
+.bnav-icon-wrap{width:38px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:10px;transition:background .2s}
+.bnav-icon{width:19px;height:19px;display:block;flex-shrink:0}
+.bnav-label{font-size:9.5px;font-weight:500;white-space:nowrap;letter-spacing:.1px}
+
+/* ── SHARED PAGES ── */
+.page{display:none;padding:16px}
+.page.active{display:block}
+.page-desk{display:none}
+.page-desk.active{display:block}
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;gap:10px;flex-wrap:wrap}
+.page-title{font-size:18px;font-weight:600;letter-spacing:-.3px}
+.page-sub{font-size:12px;color:var(--text3);margin-top:2px}
+.date-badge{font-family:'DM Mono',monospace;font-size:11px;background:var(--bg3);border:1px solid var(--border);padding:4px 10px;border-radius:20px;color:var(--text2);white-space:nowrap;flex-shrink:0}
+.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
+@media(min-width:900px){.stats-grid{grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);padding:14px 16px;position:relative;overflow:hidden}
+.stat-card::after{content:'';position:absolute;width:50px;height:50px;border-radius:50%;top:-12px;right:-12px;opacity:.12}
+.stat-card.blue::after{background:var(--accent)}
+.stat-card.green::after{background:var(--accent2)}
+.stat-card.yellow::after{background:var(--warn)}
+.stat-card.purple::after{background:var(--purple)}
+.stat-label{font-size:10px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.stat-value{font-size:22px;font-weight:600;letter-spacing:-.5px}
+.stat-value.blue{color:var(--accent)}
+.stat-value.green{color:var(--accent2)}
+.stat-value.yellow{color:var(--warn)}
+.stat-value.purple{color:var(--purple)}
+.stat-sub{font-size:10px;color:var(--text3);margin-top:3px}
+.panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);padding:16px;margin-bottom:14px}
+@media(min-width:900px){.panel{padding:20px 24px;margin-bottom:20px}}
+.panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+.panel-title{font-size:14px;font-weight:600}
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:12px}
+@media(min-width:900px){table{font-size:13px}}
+table th{text-align:left;padding:8px 10px;color:var(--text3);font-weight:500;font-size:10px;text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--border);white-space:nowrap}
+table td{padding:9px 10px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:middle}
+table tr:last-child td{border-bottom:none}
+table tr:hover td{background:var(--bg3)}
+.td-name{color:var(--text)!important;font-weight:500}
+.td-mono{font-family:'DM Mono',monospace;font-size:11px}
+.badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:500;white-space:nowrap}
+.badge-green{background:rgba(34,197,94,.12);color:var(--success)}
+.badge-blue{background:rgba(79,142,247,.12);color:var(--accent)}
+.badge-yellow{background:rgba(245,158,11,.12);color:var(--warn)}
+.badge-red{background:rgba(239,68,68,.12);color:var(--danger)}
+.badge-purple{background:rgba(167,139,250,.12);color:var(--purple)}
+.badge-gray{background:var(--bg3);color:var(--text3)}
+.prog-bar{height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-top:5px}
+.prog-fill{height:100%;border-radius:3px;transition:width .4s ease}
+.caller-grid{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:900px){.caller-grid{grid-template-columns:repeat(2,1fr);gap:16px}}
+.caller-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);padding:14px}
+@media(min-width:900px){.caller-card{padding:18px 20px}}
+.caller-card-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0}
+.caller-name{font-size:14px;font-weight:600}
+.caller-role{font-size:11px;color:var(--text3);margin-top:2px}
+.task-list{max-height:180px;overflow-y:auto}
+.task-item{display:flex;align-items:flex-start;gap:6px;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px}
+.task-item:last-child{border-bottom:none}
+.task-num{color:var(--text3);min-width:20px;flex-shrink:0;font-family:'DM Mono',monospace;font-size:10px}
+.task-name{color:var(--text2);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.task-demo{color:var(--accent);font-size:10px;cursor:pointer;text-decoration:none;white-space:nowrap}
+.ctrl-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.ctrl-row label{font-size:12px;color:var(--text2)}
+.ctrl-row select,.ctrl-row input[type="number"]{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;-webkit-appearance:none;min-width:0}
+.ctrl-row select:focus,.ctrl-row input:focus{border-color:var(--accent)}
+.btn{padding:8px 14px;border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;border:1px solid transparent;white-space:nowrap}
+.btn:active{opacity:.75;transform:scale(.97)}
+.btn-accent{background:var(--accent);color:#fff}
+.btn-accent:hover{opacity:.9}
+.btn-secondary{background:transparent;border-color:var(--border2);color:var(--text2)}
+.btn-secondary:hover{border-color:var(--text3);color:var(--text)}
+.btn-green{background:rgba(34,197,94,.15);color:var(--success);border-color:rgba(34,197,94,.2)}
+.btn-green:hover{background:rgba(34,197,94,.25)}
+.btn-sm{padding:5px 10px;font-size:11px}
+.btn-danger{background:rgba(239,68,68,.12);color:var(--danger);border-color:rgba(239,68,68,.2)}
+.btn-danger:hover{background:rgba(239,68,68,.2)}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px)}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:20px 20px 0 0;padding:20px 20px calc(20px + var(--safe-bottom));width:100%;max-width:520px;max-height:90dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;box-shadow:0 -20px 60px rgba(0,0,0,.7);animation:slideUpModal .25s ease}
+@media(min-width:600px){.modal{border-radius:20px;margin-bottom:40px}}
+@keyframes slideUpModal{from{transform:translateY(100%)}to{transform:translateY(0)}}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-handle{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 16px}
+.modal-title{font-size:16px;font-weight:600;margin-bottom:16px}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
+.pay-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.input-group{display:flex;align-items:center}
+.input-group .prefix{padding:12px 10px;background:var(--bg3);border:1px solid var(--border);border-right:none;border-radius:var(--radius) 0 0 var(--radius);color:var(--text3);font-size:14px}
+.input-group input{border-radius:0 var(--radius) var(--radius) 0!important}
+#alertBox{position:fixed;top:calc(var(--header-h) + var(--safe-top) + 8px);right:12px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;max-width:320px}
+.alert{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius2);padding:12px 16px;font-size:13px;display:flex;align-items:center;gap:8px;box-shadow:0 8px 24px rgba(0,0,0,.5);animation:slideDown .3s ease;pointer-events:auto}
+@keyframes slideDown{from{transform:translateY(-20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.alert.success{border-left:3px solid var(--success)}
+.alert.error{border-left:3px solid var(--danger)}
+.alert.info{border-left:3px solid var(--accent)}
+.my-task-item{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--border)}
+.my-task-item:last-child{border-bottom:none}
+.task-checkbox{width:22px;height:22px;border:2px solid var(--border2);border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.task-checkbox.done{background:var(--success);border-color:var(--success)}
+.task-checkbox.done::after{content:'✓';color:#fff;font-size:13px;font-weight:700}
+.task-details{flex:1;min-width:0}
+.task-clinic{font-weight:500;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px}
+.task-phone{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);margin-top:2px}
+.task-actions{display:flex;gap:6px;align-items:center;flex-shrink:0}
+.filter-row{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px;scrollbar-width:none}
+.filter-row::-webkit-scrollbar{display:none}
+.filter-chip{padding:5px 12px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;background:var(--bg3);color:var(--text2);border:1px solid var(--border);white-space:nowrap;flex-shrink:0}
+.filter-chip.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.empty{text-align:center;padding:32px 20px;color:var(--text3);font-size:13px}
+.empty-icon{font-size:32px;margin-bottom:10px}
+.call-btn{display:inline-flex;align-items:center;gap:4px;background:rgba(34,197,94,.12);color:var(--success);border:1px solid rgba(34,197,94,.2);border-radius:8px;padding:5px 8px;font-size:14px;font-weight:500;text-decoration:none;white-space:nowrap}
+.settings-input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:16px;outline:none;margin-top:4px;-webkit-appearance:none;font-family:'DM Sans',sans-serif}
+.settings-input:focus{border-color:var(--accent)}
+.mini-stats{display:flex;gap:8px;margin:10px 0}
+.mini-stat{flex:1;background:var(--bg3);border-radius:8px;padding:9px 10px;text-align:center}
+.mini-stat-val{font-size:17px;font-weight:700}
+.mini-stat-lbl{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;margin-top:2px}
+</style>
+</head>
+<body>
+
+<!-- ══════ LOGIN ══════ -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">Nex <span>Studio</span></div>
+    <div class="login-sub">Caller Management System</div>
+    <div class="login-tabs">
+      <div class="login-tab active" onclick="switchLoginTab('admin')">Admin</div>
+      <div class="login-tab" onclick="switchLoginTab('caller')">Caller</div>
+    </div>
+    <div id="callerSelectWrap" class="field" style="display:none">
+      <label>Select Account</label>
+      <select id="callerSelect"></select>
+    </div>
+    <div class="field">
+      <label>Username / ID</label>
+      <input type="text" id="loginUser" placeholder="Enter ID" autocomplete="off" autocorrect="off" autocapitalize="off">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="loginPass" placeholder="Enter password" autocomplete="current-password">
+    </div>
+    <button class="btn-primary" onclick="doLogin()">Sign In →</button>
+    <div class="login-err" id="loginErr"></div>
+  </div>
+</div>
+
+<!-- ══════ DESKTOP APP ══════ -->
+<div id="app">
+  <div class="sidebar">
+    <div class="sidebar-logo">Nex <span>.</span></div>
+    <div class="sidebar-user">
+      <div class="sidebar-user-name" id="sidebarName">—</div>
+      <div class="sidebar-user-role" id="sidebarRole">—</div>
+    </div>
+    <div id="navItems"></div>
+    <div class="sidebar-bottom">
+      <button class="btn-logout" onclick="logout()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </button>
+    </div>
+  </div>
+  <div class="main-content-desk" id="mainContent"></div>
+</div>
+
+<!-- ══════ MOBILE APP ══════ -->
+<div id="appMobile">
+  <div class="app-header">
+    <div class="header-logo">Nex <span>.</span></div>
+    <div class="header-right">
+      <div class="header-avatar" id="headerAvatar" style="background:#1a3a5c;color:#4f8ef7"></div>
+      <div class="header-name" id="headerName">—</div>
+      <button class="btn-header-logout" onclick="logout()" title="Sign Out">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="mob-main" id="mobMainContent"></div>
+  <div class="bottom-nav" id="bottomNav"></div>
+</div>
+
+<!-- ══════ PAYMENT MODAL ══════ -->
+<div class="modal-overlay" id="payModal" onclick="if(event.target===this)closeModal('payModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">💳 Record Payment</div>
+    <input type="hidden" id="payCallerTarget">
+    <div class="pay-grid">
+      <div class="field"><label>Caller</label><input type="text" id="payCallerName" readonly style="opacity:.6"></div>
+      <div class="field"><label>Amount (₹)</label><div class="input-group"><span class="prefix">₹</span><input type="number" id="payAmt" placeholder="0" min="0" inputmode="numeric"></div></div>
+      <div class="field"><label>Date</label><input type="date" id="payDate"></div>
+      <div class="field"><label>Type</label><select id="payType"><option>Salary</option><option>Bonus</option><option>Incentive</option><option>Advance</option><option>Other</option></select></div>
+    </div>
+    <div class="field"><label>Note (optional)</label><input type="text" id="payNote" placeholder="Reason or note"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('payModal')">Cancel</button>
+      <button class="btn btn-accent" onclick="savePayment()">Save Payment</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ DEAL MODAL ══════ -->
+<div class="modal-overlay" id="dealModal" onclick="if(event.target===this)closeModal('dealModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🤝 Log a Deal</div>
+    <input type="hidden" id="dealCallerTarget">
+    <div class="field"><label>Caller</label><input type="text" id="dealCallerName" readonly style="opacity:.6"></div>
+    <div class="pay-grid">
+      <div class="field"><label>Client Name</label><input type="text" id="dealClient" placeholder="Clinic / Client"></div>
+      <div class="field"><label>Deal Value (₹)</label><div class="input-group"><span class="prefix">₹</span><input type="number" id="dealValue" placeholder="0" min="0" inputmode="numeric"></div></div>
+      <div class="field"><label>Date</label><input type="date" id="dealDate"></div>
+      <div class="field"><label>Status</label><select id="dealStatus"><option>Closed</option><option>Follow-up</option><option>In Progress</option><option>Demo Scheduled</option></select></div>
+    </div>
+    <div class="field"><label>Notes</label><input type="text" id="dealNotes" placeholder="Any remarks"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('dealModal')">Cancel</button>
+      <button class="btn btn-accent" onclick="saveDeal()">Save Deal</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ LOGOUT CONFIRM MODAL ══════ -->
+<div class="modal-overlay" id="logoutModal">
+  <div class="modal" style="max-height:unset;padding:24px 24px calc(24px + var(--safe-bottom))">
+    <div class="modal-handle"></div>
+    <div style="text-align:center;margin-bottom:8px;font-size:28px">👋</div>
+    <div class="modal-title" style="text-align:center;margin-bottom:6px">Sign out?</div>
+    <div style="text-align:center;font-size:13px;color:var(--text3);margin-bottom:20px">You will be returned to the login screen.</div>
+    <div class="modal-footer" style="justify-content:center;gap:12px">
+      <button class="btn btn-secondary" style="min-width:100px" onclick="document.getElementById('logoutModal').classList.remove('open')">Cancel</button>
+      <button class="btn btn-danger" style="min-width:100px;font-weight:700" onclick="doLogout()">Sign Out</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ ADD LEAD MODAL ══════ -->
+<div class="modal-overlay" id="addLeadModal" onclick="if(event.target===this)closeModal('addLeadModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">➕ Add Lead Manually</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:16px">Add a new lead after all 879 listed leads are done. It will be available for assignment.</div>
+    <div class="field"><label>Business Name *</label><input type="text" id="newLeadName" placeholder="e.g. Sri Krishna Clinic"></div>
+    <div class="field"><label>Phone Number *</label><input type="tel" id="newLeadPhone" placeholder="91XXXXXXXXXX" inputmode="numeric"></div>
+    <div class="field"><label>Niche / Category</label><input type="text" id="newLeadNiche" placeholder="e.g. General Family Medicine"></div>
+    <div class="field"><label>Demo URL slug (optional)</label><input type="text" id="newLeadSlug" placeholder="e.g. sri-krishna-clinic"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('addLeadModal')">Cancel</button>
+      <button class="btn btn-accent" onclick="saveNewLead()">Add Lead</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ ADD CALLER MODAL ══════ -->
+<div class="modal-overlay" id="addCallerModal" onclick="if(event.target===this)closeModal('addCallerModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">👤 Add New Caller</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:16px">New caller will automatically receive 30 leads per assignment round.</div>
+    <div class="field"><label>Full Name *</label><input type="text" id="newCallerName" placeholder="e.g. Ravi Kumar" autocomplete="off"></div>
+    <div class="pay-grid">
+      <div class="field"><label>Login ID *</label><input type="text" id="newCallerId" placeholder="e.g. ravi01" autocomplete="off" autocorrect="off" autocapitalize="off"></div>
+      <div class="field"><label>Password *</label><input type="text" id="newCallerPass" placeholder="e.g. ravi@123" autocomplete="off"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('addCallerModal')">Cancel</button>
+      <button class="btn btn-accent" onclick="saveNewCaller()">Add Caller</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ CUSTOM CONFIRM MODAL ══════ -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal" style="max-height:unset;padding:24px 24px calc(24px + var(--safe-bottom))">
+    <div class="modal-handle"></div>
+    <div id="confirmIcon" style="text-align:center;margin-bottom:8px;font-size:28px"></div>
+    <div id="confirmTitle" style="font-size:16px;font-weight:600;text-align:center;margin-bottom:8px"></div>
+    <div id="confirmMsg" style="text-align:center;font-size:13px;color:var(--text3);margin-bottom:20px;line-height:1.6"></div>
+    <div class="modal-footer" style="justify-content:center;gap:12px">
+      <button class="btn btn-secondary" style="min-width:100px" id="confirmCancelBtn">Cancel</button>
+      <button class="btn btn-danger" style="min-width:100px;font-weight:700" id="confirmOkBtn">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<div id="alertBox"></div>
+
+<!-- ══════ INSTALL PROMPTS ══════ -->
+<div id="installBanner">
+  <div class="install-icon">📲</div>
+  <div class="install-text"><strong>Add to Home Screen</strong><span>Use Nex CRM as an app</span></div>
+  <div class="install-btns">
+    <button class="btn-install" id="installBtn">Install</button>
+    <button class="btn-dismiss" onclick="dismissInstall()">✕</button>
+  </div>
+</div>
+<div id="iosHint">📲 Tap <strong>Share</strong> → <strong>Add to Home Screen</strong> to install &nbsp;<button class="btn-dismiss" onclick="document.getElementById('iosHint').classList.remove('show');localStorage.setItem('nex_ios_d','1')">✕</button></div>
+
+<script>
+// ══════ PWA ══════
+var deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', function(e){
+  e.preventDefault(); deferredPrompt = e;
+  if(!localStorage.getItem('nex_install_dismissed'))
+    document.getElementById('installBanner').classList.add('show');
+});
+document.getElementById('installBtn').addEventListener('click', async function(){
+  if(!deferredPrompt) return;
+  deferredPrompt.prompt();
+  await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  document.getElementById('installBanner').classList.remove('show');
+});
+function dismissInstall(){ localStorage.setItem('nex_install_dismissed','1'); document.getElementById('installBanner').classList.remove('show'); }
+var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.navigator.standalone;
+if(isIOS && !localStorage.getItem('nex_ios_d')){
+  setTimeout(function(){
+    document.getElementById('iosHint').classList.add('show');
+    setTimeout(function(){ document.getElementById('iosHint').classList.remove('show'); }, 8000);
+  }, 2000);
+}
+window.addEventListener('appinstalled', function(){ document.getElementById('installBanner').classList.remove('show'); showAlert('App installed! 🎉','success'); });
+if('serviceWorker' in navigator && location.protocol === 'https:' && !location.hostname.includes('claudeusercontent')){
+  navigator.serviceWorker.register('./sw.js').catch(function(e){ console.warn('SW:', e); });
+}
+
+// ══════ DATA + FIREBASE SYNC ══════
+var DB = {
+  get: function(k){ try{ return JSON.parse(localStorage.getItem('nex_'+k)); }catch(e){ return null; } },
+  set: function(k,v){ localStorage.setItem('nex_'+k, JSON.stringify(v)); }
+};
+var TODAY = new Date().toISOString().slice(0,10);
+var BASE_URL = "https://nexstudioweb-spec.github.io/demo-clinic/";
+var LEADS_BASE_URL = "https://1414mishal.github.io/";
+
+// ── Firebase Config (shared real-time sync across all devices) ──
+var FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDemo_NexCRM_Replace_With_Real_Key",
+  authDomain: "nex-crm-sync.firebaseapp.com",
+  databaseURL: "https://nex-crm-sync-default-rtdb.firebaseio.com",
+  projectId: "nex-crm-sync",
+  storageBucket: "nex-crm-sync.appspot.com",
+  messagingSenderId: "123456789",
+  appId: "1:123456789:web:abcdef"
+};
+var fbApp = null, fbDB = null, fbSyncEnabled = false;
+
+function initFirebase(){
+  try {
+    if(typeof firebase !== 'undefined' && !fbApp){
+      fbApp = firebase.initializeApp(FIREBASE_CONFIG);
+      fbDB = firebase.database();
+      fbSyncEnabled = true;
+      setupFirebaseListeners();
+      console.log('Firebase sync active');
+    }
+  } catch(e){ console.warn('Firebase init skipped (use local mode):', e.message); }
+}
+
+// Firebase paths
+var FB_PATH = 'nexcrm/';
+
+function fbRead(path, cb){
+  if(!fbSyncEnabled){ cb(null); return; }
+  fbDB.ref(FB_PATH+path).once('value').then(function(snap){ cb(snap.val()); }).catch(function(){ cb(null); });
+}
+
+function fbWrite(path, data){
+  if(!fbSyncEnabled) return;
+  fbDB.ref(FB_PATH+path).set(data).catch(function(e){ console.warn('FB write err:', e.message); });
+}
+
+function setupFirebaseListeners(){
+  if(!fbSyncEnabled) return;
+  // Listen to assignments, progress, deals, payments for live sync
+  var listenKeys = ['assignments_'+TODAY, 'progress_'+TODAY, 'deals', 'payments', 'accounts', 'custom_leads', 'ever_assigned'];
+  listenKeys.forEach(function(key){
+    fbDB.ref(FB_PATH+key).on('value', function(snap){
+      var val = snap.val();
+      if(val !== null){
+        DB.set(key, val);
+        // Re-render if logged in
+        if(currentUser){
+          var p = isMobile ? 'pg-m-' : 'pg-d-';
+          try {
+            if(key.startsWith('assignments_') || key.startsWith('progress_')){
+              if(currentUser.role === 'admin') renderAdminAssign(p);
+              renderMyTasks(p);
+            }
+            if(key === 'deals'){ if(currentUser.role==='admin') renderDeals(p); else renderMyDeals(p); }
+            if(key === 'payments'){ if(currentUser.role==='admin') renderPayments(p); else renderMyPayments(p); }
+          } catch(e){}
+        }
+      }
+    });
+  });
+}
+
+// Override save functions to also sync to Firebase
+function syncToFB(key, value){
+  fbWrite(key, value);
+}
+
+var DEFAULT_ACCOUNTS = {
+  admin: { id:'admin', pass:'admin@123', role:'admin', name:'Admin' },
+  callers: [
+    { id:'mandir01', pass:'mandir@123', name:'Mandir',   bg:'#1a3a5c', tc:'#4f8ef7', role:'caller' },
+    { id:'sonali01', pass:'sonali@123', name:'Sonali',   bg:'#0d3328', tc:'#6ee7b7', role:'caller' },
+    { id:'steve01',  pass:'steve@123',  name:'Stevert',  bg:'#3a2800', tc:'#f59e0b', role:'caller' },
+    { id:'varsh01',  pass:'varsh@123',  name:'Varshith', bg:'#3a0d1e', tc:'#f472b6', role:'caller' },
+  ]
+};
+
+function getAccounts(){ return DB.get('accounts') || DEFAULT_ACCOUNTS; }
+function saveAccounts(a){ DB.set('accounts', a); syncToFB('accounts', a); }
+function getPayments(){ return DB.get('payments') || []; }
+function savePayments(p){ DB.set('payments', p); syncToFB('payments', p); }
+function getDeals(){ return DB.get('deals') || []; }
+function saveDeals(d){ DB.set('deals', d); syncToFB('deals', d); }
+function getAssignments(){ return DB.get('assignments_'+TODAY) || {}; }
+function saveAssignments(a){ DB.set('assignments_'+TODAY, a); syncToFB('assignments_'+TODAY, a); }
+function getProgress(){ return DB.get('progress_'+TODAY) || {}; }
+function saveProgress(p){ DB.set('progress_'+TODAY, p); syncToFB('progress_'+TODAY, p); }
+
+// Custom leads (admin can add manually after 879)
+function getCustomLeads(){ return DB.get('custom_leads') || []; }
+function saveCustomLeads(cl){ DB.set('custom_leads', cl); syncToFB('custom_leads', cl); }
+
+// Merge custom leads into LEADS array at runtime
+function getAllLeads(){
+  var custom = getCustomLeads();
+  if(!custom.length) return LEADS;
+  return LEADS.concat(custom);
+}
+
+// ══════ LEADS ══════
+var LEADS = [
+["1","Dr Mithra Hegde's Dental Speciality Clinic","919845284411","Dental","dr-mithra-hegdes-dental-speciality-clinic"],
+["2","S.A. Dental Clinic","919448177938","Dental","sa-dental-clinic"],
+["3","Deepa Dental Care (Dr. Deepa Rai)","919686260303","Dental","deepa-dental-care-dr-deepa-rai"],
+["4","Dr. Sandeep Shetty's Dental Clinic","918244113388","Dental","dr-sandeep-shettys-dental-clinic-and-orthodontic-c"],
+["5","Mangalore Dental Care (MDC)","918088631168","Dental","mangalore-dental-care-mdc"],
+["6","Dental Land","919148731647","Dental","dental-land"],
+["7","A.B.S. Dental Orthodontic Kadri","918095543050","Dental","a-b-s-dental-orthodontic-and-teeth-aligner-clinic-"],
+["8","MODERN DENTAL CLINIC","918123513431","Dental","modern-dental-clinic"],
+["9","Dr. Shourya Hegde - Braces & Aligners","919988814444","Dental","dr-shourya-hegde-braces-aligners-one-dentistry"],
+["10","Dr. Dhiraj's Dental & Invisible Braces","919448164160","Dental","dr-dhirajs-dental-invisible-braces-clinic"],
+["11","Dr Shourya Hegde - Braces Specialist","919880488299","Dental","dr-shourya-hegde-braces-and-aligners-specialist"],
+["12","White Teeth Dental Orthodontic Kottara","918618298078","Dental","white-teeth-dental-and-orthodontic-centre-kottara-"],
+["13","Dr. Rao's Orthodontic Speciality Dental","918244111124","Dental","dr-raos-orthodontic-speciality-dental-care"],
+["14","Dr. SAURAV'S DENTAL ORTHODONTIC CENTRE","919448247277","Dental","dr-sauravs-dental-clinic-and-orthodontic-centre"],
+["15","Shaffi Orthodontic Dental Speciality","918095765883","Dental","shaffi-orthodontic-dental-speciality-clinic-dr-moh"],
+["16","Maxillofacial Dental Speciality Clinic","918242494035","Dental","maxillofacial-dental-speciality-clinic-dr-arvind-r"],
+["17","Ela Dental Care","918970002489","Dental","ela-dental-care"],
+["18","Vijaya Speciality Dental Clinic","918242435222","Dental","vijaya-speciality-dental-clinic"],
+["19","THE FACE CLINIC DR. KESHAVA BHAT","918242432339","Dental","the-face-clinic-dr-keshava-bhat-facial-surgeon"],
+["20","One Dentistry Advanced Dental Implant","919459599797","Dental","one-dentistry-advanced-dental-implant-center-dr-ra"],
+["21","Smile Wise Dental Implant clinic","919591348913","Dental","smile-wise-dental-and-implant-clinic"],
+["22","INSMYLE FAMILY DENTIST Pandeshwar","919945299078","Dental","insmyle-family-dentist-pandeshwar"],
+["23","Roots Dental Dr Sharath Pare","918088347806","Dental","roots-dental-dr-sharath-pare-mds-endodontist"],
+["24","Dr Advith's Dental Root Canal","919663865060","Dental","dr-adviths-dental-care-root-canal-speciality-clini"],
+["25","Tiny Teeth Children Teens Dentistry","919819362853","Dental","tiny-teeth-children-teens-special-needs-dentistry"],
+["26","Dr.Shailesh Shenoy Pediatric Dental","919916820253","Dental","drshailesh-shenoys-pediatric-multispeciality-denta"],
+["27","Klips N Kids dental clinic","919901658407","Dental","klips-n-kids-dental-clinic"],
+["28","Dr.Sham S Bhat Dr Vidya Bhat","918242493581","Dental","drsham-s-bhat-dr-vidya-bhat-s-drswathi"],
+["29","Savil's Denthil Clinic Pediatric","919880935297","Dental","savils-denthil-clinic-pediatric-and-multispecialit"],
+["30","Smile Care centre","917022402747","Dental","smile-care-centre"],
+["31","Smile Dental Clinic","919449389571","Dental","smile-dental-clinic"],
+["32","SMILEVISION DENTAL CLINIC","918310980472","Dental","smilevision-dental-clinic"],
+["33","The Dental Studio Multi Speciality","916361702738","Dental","the-dental-studio-a-multi-speciality-dental-clinic"],
+["34","Dental Studio","919731757274","Dental","dental-studio"],
+["35","U Dent Dental clinic Implant centre","919035846117","Dental","u-dent-dental-clinic-implant-centre"],
+["36","Susheela dentacare maxillofacial implants","919845245008","Dental","susheela-dentacare-centre-for-maxillofacial-and-de"],
+["37","Dr Vivek Amin","918242442259","Dental","dr-vivek-amin"],
+["38","DENTAL SPECIALITY CLINIC Dr Rajesh","918242212093","Dental","dental-speciality-clinic-dr-rajesh-k-s-dr-roopashr"],
+["39","T32 orthodontic centre aligners braces","919632572639","Dental","t32-orthodontic-centre-aligners-and-braces-and-mul"],
+["40","Samruddhi Dental Speciality Clinic","917022081776","Dental","samruddhi-dental-speciality-clinic"],
+["41","Dr. Pramod Kumar's Skin Clinic","918217636420","Dermatology Skin","dr-pramod-kumars-skin-clinic-dermatologist-mangalo"],
+["42","Dr Girish P N","918242225626","Dermatology Skin","dr-girish-p-n"],
+["43","Dr. Jacintha Martis","918244264912","Dermatology Skin","dr-jacintha-martis"],
+["44","Dr Vijetha Rai","918951679648","Dermatology Skin","dr-vijetha-rai"],
+["45","VISH Skin Clinic","918242430559","Dermatology Skin","vish-skin-clinic"],
+["46","Dr. M Suvir Best Dermatologist","919164103722","Dermatology Skin","dr-m-suvir-best-dermatologist-in-mangaluru"],
+["47","UVA Skin Hair Cosmetology Clinic","918073228155","Dermatology Skin","uva-skin-hair-cosmetology-clinic-dr-myfanwy-dsouza"],
+["48","Dr Pinto Jerome Patric","918242422166","Dermatology Skin","dr-pinto-jerome-patric"],
+["49","Skin Code by Dr Snigdha Hegde","917204093803","Dermatology Skin","skin-code-by-dr-snigdha-hegde"],
+["50","Dr Spandana P Hegde Dermis Skin Hair","918310960780","Dermatology Skin","dr-spandana-p-hegde-dermis-skin-hair-care-best-der"],
+["51","Skin Clinic Dr. Nandakishore B","918242425677","Dermatology Skin","skin-clinic-dr-nandakishore-b"],
+["52","Belaku skin clinic","918951622660","Dermatology Skin","belaku-skin-clinic"],
+["53","Care & Cure Skin Clinic","919164080876","Dermatology Skin","care-cure-skin-clinic"],
+["54","Dr.Delsey's Homoeopathic Clinic","917204200884","Dermatology Skin","drdelseys-homoeopathic-clinic"],
+["55","Dr Sayeeda Mogral","918242434284","Dermatology Skin","dr-sayeeda-mogral"],
+["56","Dr. Sinchana's Allergy Asthma Clinic","917483250796","Dermatology Skin","dr-sinchanas-allergy-and-asthma-clinic"],
+["57","Arka Integrated Natural Wellness","919916763945","Dermatology Skin","arka-integrated-natural-wellness-centre"],
+["58","Heebs Beauty Salon","919964024423","Dermatology Skin","heebs-beauty-salon"],
+["59","Tru Aesthetics","918904036655","Dermatology Skin","tru-aesthetics"],
+["60","Freya Aesthetic Clinic","919741625390","Dermatology Skin","freya-aesthetic-clinic"],
+["61","Hair Mart unisex saloon","919035959286","Dermatology Skin","hair-mart-unisex-saloon"],
+["62","Mallikatta Neuro Centre","918242444933","Neurology","mallikatta-neuro-centre"],
+["63","Dr Shruthi N M Pediatric neurologist","917019280540","Neurology","dr-shruthi-n-m-pediatric-neurologist"],
+["64","Dr. Rajesh Shetty","919343442488","Neurology","dr-rajesh-shetty"],
+["65","Dr Shankar N","919731529925","Neurology","dr-shankar-n"],
+["66","Dr C K Ballal Neuro Clinic Brain & Spine","912443472","Neurology","dr-c-k-ballal-neuro-clinic-brain-spine-surgeon"],
+["67","Neurocare Clinic","918242427644","Neurology","neurocare-clinic"],
+["68","Dr Devadiga K V's Neuro Clinic","918242442222","Neurology","dr-devadiga-k-vs-neuro-clinic"],
+["69","Dr. Salma Suhana Consultant Neurologist","918951070333","Neurology","dr-salma-suhana-consultant-neurologist"],
+["70","Mallikatta Neurophysiological Lab","919880840112","Neurology","mallikatta-neurophysiological-lab"],
+["71","Dr Caroline Dsouza Neuro-Psychiatrist","919739397588","Neurology","dr-caroline-dsouza-neuro-psychiatrist"],
+["72","Nirvyatha Pain Management Centre","917411884636","Neurology","nirvyatha-the-exclusive-pain-management-centre-in-"],
+["73","Dr. Hemanth Kumar Medical Oncologist","917019699251","Neurology","dr-hemanth-kumar-best-medical-oncologist-cancer-sp"],
+["74","Dr Vinay Kumar Rajendra CanCure Oncology","916360437537","Neurology","dr-vinay-kumar-rajendra-best-oncologist-in-mangalo"],
+["75","Dr Karthik K S","919900070206","Neurology","dr-karthik-k-s"],
+["76","Dr. Aniruddha Shetty Psychiatrist","917795742332","Neurology","dr-aniruddha-shetty-psychiatrist"],
+["77","Kakunje Psychiatry Counselling Centre","917411090195","Neurology","kakunje-psychiatry-and-counselling-centre"],
+["78","GSS Psychotherapy Centre Inner Peace","918660922867","Neurology","gss-psychotherapy-centre-the-inner-peace-lifestyle"],
+["79","Shifa Clinical Lab Allergy Testing","919743445084","Neurology","shifa-clinical-lab-and-allergy-testing-research-ce"],
+["80","Yusraa Medical & Diagnostic Centre","918242253303","Neurology","yusraa-medical-diagnostic-centre"],
+["81","Apollo 24|7 Lab Kapikad Mangaluru","918048851037","Neurology","apollo-247-lab-tests-near-me-kapikad-home-collecti"],
+["82","PENCHAS MEDICAL LABORATORY","918970220100","Neurology","penchas-medical-laboratory"],
+["83","LIFE CARE HEALTH CENTRE","919008352102","Neurology","life-care-health-centre"],
+["84","Manipal hospital","9118001025555","Neurology","manipal-hospital"],
+["85","Dr. M N BHAT Best Cardiologist Mangalore","918244267077","Cardiology","dr-m-n-bhat-best-cardiologist-of-mangalore"],
+["86","Dr Ashok Jain Clinic","918147984407","Cardiology","dr-ashok-jain-clinic"],
+["87","Dr. Ramanath L. Kamath","919845084345","Cardiology","dr-ramanath-l-kamath"],
+["88","Dr. Narasimha Pai","918242421340","Cardiology","dr-narasimha-pai"],
+["89","Dr. R Purushotham","918242224403","Cardiology","dr-r-purushotham"],
+["90","Dr. A Harish Rao","918242440266","Cardiology","dr-a-harish-rao"],
+["91","DR. PAUL VARGHESE","918244245555","Cardiology","dr-paul-varghese"],
+["92","Dr Pradeep Pereira","912422166","Cardiology","dr-pradeep-pereira"],
+["93","Cardiology at Doorsteps CAD Heart Care","919731854508","Cardiology","cardiology-at-doorsteps-cad-foundation-and-heart-c"],
+["94","Dr A V Shetty's Cardiac Clinic","918242425533","Cardiology","dr-a-v-shettys-cardiac-clinic"],
+["95","Dr. Shyam K Ashok Top Cardiac Surgeon","919611953300","Cardiology","top-cardiac-surgeon-ctvs-specialist-best-cardiac-s"],
+["96","V CARE SCAN CENTRE","919606845666","Cardiology","v-care-scan-centre"],
+["97","Mangalore Diagnostic Center MDC","918792321777","Cardiology","mangalore-diagnostic-centermdc"],
+["98","Balmatta Diagnostic Research Centre","918242443479","Cardiology","balmatta-diagnostic-research-centre-ltd"],
+["99","MEDISCAN DIAGNOSTICS IMRI","918242443046","Cardiology","mediscan-diagnostics-imri"],
+["100","Balmatta Scan Centre","919845286711","Cardiology","balmatta-scan-centre"],
+["101","Insight Speciality Ultrasound Scan Centre","916361209334","Cardiology","insight-speciality-ultrasound-scan-centre"],
+["102","Dr Lenon DSouza - The Vascular Centre","918244011165","Cardiology","dr-lenon-dsouza-the-vascular-centre-varicose-vein-"],
+["103","Dr Naveen","919963041418","Cardiology","dr-naveen"],
+["104","Breathwell Respiratory Clinic","919880488303","Cardiology","breathwell-respiratory-clinic-dr-megha-s-n-pulmono"],
+["105","Chest Clinic Mangalore","919986886565","Cardiology","chest-clinic-mangalore-dr-harsha-d-s-pulmonologist"],
+["106","Dr Shrinath Shetty Clinic","919844004943","Cardiology","dr-shrinath-shetty-clinic-endo-diacare-clinic-best"],
+["107","MediFit Clinic","918073718403","Cardiology","medifit-clinic"],
+["108","Dr Ashith Shettian- Consultant Physician","919886291338","Cardiology","dr-ashith-shettian-consultant-physician"],
+["109","Dr. Ganesh H K","918242430478","Cardiology","dr-ganesh-h-k"],
+["110","Swasthya Physiotherapy and Rehabilitation Centre - SPARC","919019431417","Cardiology","swasthya-physiotherapy-and-rehabilitation-centre-s"],
+["111","BARC-Born Again Recovery Center","917204607407","Cardiology","barc-born-again-recovery-center"],
+["112","UNNATHI Psychosocial Rehabilitation Centre","919739856444","Cardiology","unnathi-psychosocial-rehabilitation-centre-r"],
+["113","Pumpwell - Thyrocare Diagnostic Lab","918892602577","Cardiology","pumpwell-thyrocare-diagnostic-lab-blood-test-centr"],
+["114","Ortho Kneeds - Dr. Deepak Rai","918242445824","Orthopedics","ortho-kneeds-dr-deepak-rai"],
+["115","Dr Shantharam M Shetty","918242428669","Orthopedics","dr-shantharam-m-shetty"],
+["116","Dr.Mayur Rai K Rai Ortho Clinic","919880368697","Orthopedics","drmayur-rai-k-rai-ortho-clinic"],
+["117","Prof Dr. K S Arif","919845085931","Orthopedics","prof-dr-k-s-arif"],
+["118","Dr Varun Shetty Pediatric Orthopedic Surgeon","918317404673","Orthopedics","dr-varun-shetty-pediatric-orthopedic-surgeon"],
+["119","Dr.Amarnath Savur Orthopaedic Clinic","918242449678","Orthopedics","dramarnath-savur-orthopaedic-clinic"],
+["120","Dr. Surendra U Kamath","919113240117","Orthopedics","dr-surendra-u-kamath"],
+["121","DR AVINASH KUMAR Consultant Orthopedic Surgeon","919035606205","Orthopedics","dr-avinash-kumar-consultant-orthopedic-surgeon-in-"],
+["122","Bejai Diagnostic Centre","919740092787","Orthopedics","bejai-diagnostic-centre"],
+["123","ACUREATUS AI PHYSIO PAIN CLINIC","917204807188","Orthopedics","acureatus-ai-physio-pain-clinic"],
+["124","Dr. Praveen Kumar Rai G","917022543555","Orthopedics","dr-praveen-kumar-rai-g-mbbs-mrcsed-frcs-ortho-dipl"],
+["125","Dr. Sajjan Shenoy, Rheumatology And Immunology Clinic","918951124479","Orthopedics","dr-sajjan-shenoy-rheumatology-and-immunology-clini"],
+["126","Dr Shivraj Padiyar, Consultant Rheumatologist","918861586249","Orthopedics","dr-shivraj-padiyar-consultant-rheumatologist-and-a"],
+["127","Dr Arifa Haleema-Mangalore arthritis clinic","919986627690","Orthopedics","dr-arifa-haleema-mangalore-arthritis-clinic"],
+["128","Isha Knee & Shoulder Clinic","918242444318","Orthopedics","isha-knee-shoulder-clinic"],
+["129","Medilife Clinic Dr.Priyatham Kamath","916363648116","Orthopedics","medilife-clinic-drpriyatham-kamath-podiatric-surge"],
+["130","Paada - The foot Clinic","919632583333","Orthopedics","paada-the-foot-clinic"],
+["131","Arogyam Holistic Health Clinic - Dr.Ananya Phadke","919980481272","Orthopedics","arogyam-holistic-health-clinic-drananya-phadke"],
+["132","Mangalore Physiotherapy Clinic","919986120213","Orthopedics","mangalore-physiotherapy-clinic"],
+["133","Regain Rejoice Physiotherapy & Rehabilitation Centre","917795136787","Orthopedics","regain-rejoice-physiotherapy-rehabilitation-centre"],
+["134","Shaffi Physiotherapy and Rehabilitation Clinic","918762951883","Orthopedics","shaffi-physiotherapy-and-rehabilitation-clinic-dr-"],
+["135","VYOM PHYSIOTHERAPY CLINIC","918088242849","Orthopedics","vyom-physiotherapy-clinic"],
+["136","Physiotherapy Clinic","918762361721","Orthopedics","physiotherapy-clinic"],
+["137","Body mech physiotherapy clinic","917619149717","Orthopedics","body-mech-physiotherapy-clinic"],
+["138","Kinesio World Physiotherapy And Rehabilitation Centre","917899631455","Orthopedics","kinesio-world-physiotherapy-and-rehabilitation-cen"],
+["139","Marmanaadi Pain and Wellness Clinic","919445762325","Orthopedics","marmanaadi-pain-and-wellness-clinic"],
+["140","RMC Advanced Regenerative Medicine Centre","918050838647","Orthopedics","rmc-advanced-regenerative-medicine-centre"],
+["141","Infinity Eye Care","918244110079","Ophthalmology Eye","infinity-eye-care"],
+["142","Nayak's Eye Clinic","918242423377","Ophthalmology Eye","nayaks-eye-clinic"],
+["143","SUMITA EYE CLINIC & LASIK CENTER- DR MANJUNATH KAMATH","919741474919","Ophthalmology Eye","sumita-eye-clinic-lasik-center-dr-manjunath-kamath"],
+["144","c r kamath, sri rama krishna eye Clinic","918242423763","Ophthalmology Eye","c-r-kamath-sri-rama-krishna-eye-clinic-square-circ"],
+["145","Doctor Sudhir Hegde Eye Specialist","918244266363","Ophthalmology Eye","doctor-sudhir-hegde-eye-specialist"],
+["146","AL BASAR EYE CARE CENTRE","919019993198","Ophthalmology Eye","al-basar-eye-care-centre"],
+["147","Khandige Eye Clinic","919663369146","Ophthalmology Eye","khandige-eye-clinic"],
+["148","Dristi Eye & Contact Lens Clinic","918242215413","Ophthalmology Eye","dristi-eye-contact-lens-clinic"],
+["149","Trinaya eye care clinic and opticals","919901988085","Ophthalmology Eye","trinaya-eye-care-clinic-and-opticals-retina-center"],
+["150","Dr. T. Rathnakar","919741545064","Ophthalmology Eye","dr-t-rathnakar"],
+["151","SDM EYE HOSPITAL","918217408359","Ophthalmology Eye","sdm-eye-hospital"],
+["152","Prathibha Eye Hospital","918242224460","Ophthalmology Eye","prathibha-eye-hospital"],
+["153","Prashanth Netralaya Eye Hospital","918242444726","Ophthalmology Eye","prashanth-netralaya-eye-hospital"],
+["154","Avigna Eye Clinic","919341686505","Ophthalmology Eye","avigna-eye-clinic"],
+["155","THOKOTTU IKSHA EYE CLINIC & LASIK CENTER","919106512012","Ophthalmology Eye","thokottu-iksha-eye-clinic-lasik-center"],
+["156","Dr Anupama Bappal, Balmatta Retina Clinic","918242444708","Ophthalmology Eye","dr-anupama-bappal-balmatta-retina-clinic"],
+["157","Dr Murthy's Eye Care Centre","917676741279","Ophthalmology Eye","dr-murthys-eye-care-centre"],
+["158","Belaku Eye clinic","916362976351","Ophthalmology Eye","belaku-eye-clinic"],
+["159","Dr Prashanth Shetty Eye Clinic","918242429580","Ophthalmology Eye","dr-prashanth-shetty-eye-clinic"],
+["160","VISION CARE OPTICALS","918881000222","Ophthalmology Eye","vision-care-opticals"],
+["161","SPOORTHI POLYCLINIC Eye Surgeon DR Vasanthi Bangera","919845251178","Ophthalmology Eye","spoorthi-polyclinic-eye-surgeon-dr-vasanthi-banger"],
+["162","Shubhan Opticals","918553216266","Ophthalmology Eye","shubhan-opticals"],
+["163","I Needs Opticals, Mangalore","917892887713","Ophthalmology Eye","i-needs-opticals-mangalore"],
+["164","Drushti Drishti Opticals","919480004549","Ophthalmology Eye","drushti-drishti-opticals"],
+["165","Optic Gallery","919845222380","Ophthalmology Eye","optic-gallery"],
+["166","Dr Joylene D'Almeida-Obstetrician-Gynecologist","919880487755","Gynecology Womens Health","dr-joylene-dalmeida-obstetrician-gynecologist-in-m"],
+["167","Dr. Hema Mallya Gynecologist & Obstetrician","918310584511","Gynecology Womens Health","dr-hema-mallya-gynecologist-obstetrician"],
+["168","Dr Geethanjali Shetty","919448910878","Gynecology Womens Health","dr-geethanjali-shetty"],
+["169","Dr veena r bhat","919343561066","Gynecology Womens Health","dr-veena-r-bhat"],
+["170","Well Woman Clinic, Dr Poornima Nair Gynaecologist","919480982565","Gynecology Womens Health","well-woman-clinic-dr-poornima-nair-gynaecologist"],
+["171","Dr. Bhavana Sherigar MBBS,MD,FICOG","917899385500","Gynecology Womens Health","dr-bhavana-sherigar-mbbsmdficog"],
+["172","Dr. Sharon Rasquinha (Gynaec)","919886138483","Gynecology Womens Health","dr-sharon-rasquinha-gynaec"],
+["173","Vatsalya Woman and Child Clinic Mangalore","919482062584","Gynecology Womens Health","vatsalya-woman-and-child-clinic-mangalore"],
+["174","Mohini Clinic","918242211881","Gynecology Womens Health","mohini-clinic"],
+["175","Vatsala clinic","919482253983","Gynecology Womens Health","vatsala-clinic"],
+["176","Bhadram Women's Ayur care","917022695112","Gynecology Womens Health","bhadram-womens-ayur-care-vaidya-yajna-naravi"],
+["177","Dr S R Nayak's Clinic","918242212370","Gynecology Womens Health","dr-s-r-nayaks-clinic"],
+["178","Dr. Niyaf N A - IVF Specialist in Mangalore","919606996474","Gynecology Womens Health","dr-niyaf-n-a-ivf-specialist-in-mangalore-birla-fer"],
+["179","Dr. Sapna Vinit Amin - IVF Specialist in Mangalore","918951910911","Gynecology Womens Health","dr-sapna-vinit-amin-ivf-specialist-in-mangalore-bi"],
+["180","Dr Devadas Pai Infertility Clinic","918242457677","Gynecology Womens Health","dr-devadas-pai-infertility-clinic"],
+["181","Vijaya Clinic","918242217877","Gynecology Womens Health","vijaya-clinic"],
+["182","Atulyam Superspeciality Clinic","918310971632","Gynecology Womens Health","atulyam-superspeciality-clinic"],
+["183","Dr Kadri Yogesh Bangera","919845656470","Gynecology Womens Health","dr-kadri-yogesh-bangera"],
+["184","Dr Shankari Padmanabha","918242216173","Gynecology Womens Health","dr-shankari-padmanabha"],
+["185","Zulekha Yenepoya Institute of Oncology","918904181950","Gynecology Womens Health","zulekha-yenepoya-institute-of-oncology-supported-b"],
+["186","Dr Sanath Hegde Y","918242218551","Gynecology Womens Health","dr-sanath-hegde-y"],
+["187","Dr Smitha S Rao","919449991115","Gynecology Womens Health","dr-smitha-s-rao"],
+["188","Dr.B.Ranjith Shetty","918242445040","Gynecology Womens Health","drbranjith-shetty"],
+["189","Dr. Manvith Kannur - Consultant General and Advanced Laparoscopic Surgeon","919164217059","Gynecology Womens Health","dr-manvith-kannur-consultant-general-and-advanced-"],
+["190","THE MOTHER'S CARE Specialised Lactation Center","918197555375","Gynecology Womens Health","the-mothers-care-specialised-lactation-center"],
+["191","Vishal Children's & Maternity Hospital","918242493032","Gynecology Womens Health","vishal-childrens-maternity-hospital"],
+["192","Maina Shet Lactation Consultant","919945643592","Gynecology Womens Health","maina-shet-lactation-consultant"],
+["193","Bubbles Kids N Teens Clinic Dr Preetham Philip Tauro","919845528257","Pediatrics Child Health","bubbles-kids-n-teens-clinic-dr-preetham-philip-tau"],
+["194","Sunshine children clinic","918244294470","Pediatrics Child Health","sunshine-children-clinic"],
+["195","Srinivasa Children's Clinic","919343434344","Pediatrics Child Health","srinivasa-childrens-clinic"],
+["196","Dr U Venkatraman Shenoy","918242429549","Pediatrics Child Health","dr-u-venkatraman-shenoy"],
+["197","Dr. Habib Khan","918242431266","Pediatrics Child Health","dr-habib-khan"],
+["198","Rao Subba Dr P","918242412481","Pediatrics Child Health","rao-subba-dr-p"],
+["199","Dr M Faheem (MBBS,DCH,MD)","918123446262","Pediatrics Child Health","dr-m-faheem-mbbsdchmd"],
+["200","Regional Advanced Paediatric Care Center","918242413283","Pediatrics Child Health","regional-advanced-paediatric-care-center"],
+["201","Sparsha Children's Clinic","918242987744","Pediatrics Child Health","sparsha-childrens-clinic"],
+["202","Dr Chandana Pai","918310820683","Pediatrics Child Health","dr-chandana-pai"],
+["203","Dr Kishan B Shetty Pediatric Surgeon","919845506060","Pediatrics Child Health","dr-kishan-b-shetty-pediatric-surgeon"],
+["204","MAHALE Children's clinic","919945160695","Pediatrics Child Health","mahale-childrens-clinic-second-floor-at-falnir-hea"],
+["205","Children clinic Belaku","919986287218","Pediatrics Child Health","children-clinic-belaku"],
+["206","Dr. Ananth Pai's Clinic","918242988927","Pediatrics Child Health","dr-ananth-pais-clinic"],
+["207","Government Wenlock Hospital","918242442744","Pediatrics Child Health","government-wenlock-hospital-administrative-buildin"],
+["208","SHREYA CLINIC & IMMUNISATION CENTER","918242215662","Pediatrics Child Health","shreya-clinic-immunisation-center"],
+["209","Dr. Anil Kumar","919448115918","Pediatrics Child Health","dr-anil-kumar"],
+["210","Neokids Clinic -Dr.Karthik S Kolkur","919187320794","Pediatrics Child Health","neokids-clinic-drkarthik-s-kolkur"],
+["211","Dr Swathi Rao Pediatric Clinic","919008566112","Pediatrics Child Health","dr-swathi-rao-pediatric-clinic"],
+["212","Sri Durga Clinic Dr. Naresh Rao","919148122466","Pediatrics Child Health","sri-durga-clinic-dr-naresh-rao"],
+["213","Dr. B. Sandeep Rai Best Paediatric Surgeon","918123636877","Pediatrics Child Health",""],
+["214","Dr Suhitha G","919855241166","Pediatrics Child Health","dr-suhitha-g"],
+["215","Dr.Shilpa hegde Developmental and Behavioural pediatrician","919769559779","Pediatrics Child Health","drshilpa-hegde-developmental-and-behavioural-pedia"],
+["216","Ahana and Her","917358969579","Pediatrics Child Health","ahana-and-her"],
+["217","Milestones Autism & Early Intervention Centre","919886160550","Pediatrics Child Health","milestones-autism-early-intervention-centre"],
+["218","Ephphatha speech therapy centre","918904795809","Pediatrics Child Health","ephphatha-speech-therapy-centre"],
+["219","EPHPHATHA SPEECH AND HEARING CLINIC","919986161239","Pediatrics Child Health","ephphatha-speech-and-hearing-clinic"],
+["220","Sneha bhat speech language pathologist and audiologist","918217671047","Pediatrics Child Health","sneha-bhat-speech-language-pathologist-and-audiolo"],
+["221","Aikyam Center for Child Development and Disabilities","917907514400","Pediatrics Child Health","aikyam-center-for-child-development-and-disabiliti"],
+["222","Anirvedha","919482186289","Pediatrics Child Health","anirvedha"],
+["223","Dr Clinton Castelino- Consultant Psychiatrist and Counsellor","917204422222","Pediatrics Child Health","dr-clinton-castelino-consultant-psychiatrist-and-c"],
+["224","Dr Rajesh M","919535618383","Pediatrics Child Health","dr-rajesh-m"],
+["225","Arka Health Care- Psychiatry Clinic : Dr. Manu Anand","916361843907","Pediatrics Child Health","arka-health-care-psychiatry-clinic-dr-manu-anand"],
+["226","DysphagiaRehab & Hearing Health Care","919449499659","Pediatrics Child Health","dysphagiarehab-hearing-health-care-mr-hemaraja-nay"],
+["227","JS Hearing and Speech Clinic - Dr. Jayashree S Bhat","918105230732","Pediatrics Child Health","js-hearing-and-speech-clinic-dr-jayashree-s-bhat"],
+["228","TMC Hearing Care Clinic","918431925185","Pediatrics Child Health","tmc-hearing-care-clinic"],
+["229","Anupama Rao Mody's speech and language clinic","919900700382","Pediatrics Child Health","anupama-rao-modys-speech-and-language-clinic"],
+["230","Renew & Revive Occupational Therapy","919480596418","Pediatrics Child Health","renew-revive-occupational-therapy"],
+["231","CAIM","916363181780","Pediatrics Child Health","caim"],
+["232","Pragathi Counselling Center Ms.Radha S Bhat","919008384769","Pediatrics Child Health","pragathi-counselling-center-msradha-s-bhat"],
+["233","Mangalore Nursing Home","918242218316","Pediatrics Child Health","mangalore-nursing-home"],
+["234","Dr Navisha Latheef's ENT Centre","919164257555","Pediatrics Child Health","dr-navisha-latheefs-ent-centre"],
+["235","DR SHREE HARSHA THULAPULE EAR NOSE AND THROAT CLINIC","918073012931","Pediatrics Child Health","dr-shree-harsha-thulapule-ear-nose-and-throat-clin"],
+["236","DR. KULDEEP MORAS, MS, ENT SPECIALIST","919742540638","Pediatrics Child Health","dr-kuldeep-moras-ms-ent-specialist"],
+["237","Dr Goutham MK Ajila ENT Surgeon & Cochlear implant Specialist","918317447811","Pediatrics Child Health","dr-goutham-mk-ajila-ent-surgeon-cochlear-implant-s"],
+["238","Dr Rukma Bhandary","918088616791","Pediatrics Child Health","dr-rukma-bhandary"],
+["239","Dr Satish Bhandary","918242425745","Pediatrics Child Health","dr-satish-bhandary"],
+["240","Dr N.A.Mohammed ENT Surgeon, Falnir","918746020720","Pediatrics Child Health","dr-namohammed-ent-surgeon-falnir"],
+["241","Dr Nishma","918169832198","Pediatrics Child Health","dr-nishma"],
+["242","Dr T Bhaskar Alva's ENT Clinic","917892692917","Pediatrics Child Health","dr-t-bhaskar-alvas-ent-clinic"],
+["243","Dr G K Hebbar's ENT Clinic","918242423077","Pediatrics Child Health","dr-g-k-hebbars-ent-clinic"],
+["244","Anushree ENT clinic Dr.M Panduranga Kamath","919845147529","Pediatrics Child Health","anushree-ent-clinic-drm-panduranga-kamath"],
+["245","Shashirekha ENT Clinic","918762556908","Pediatrics Child Health","shashirekha-ent-clinic"],
+["246","Agilus diagnostics - kadri","918242426433","Diagnostics Labs","agilus-diagnostics-kadri-home-collection"],
+["247","Roshan X-RAY and ECG Centre (Digital)","919342015592","Diagnostics Labs","roshan-x-ray-and-ecg-centre-digital"],
+["248","MEDISTAR DIAGNOSTIC CENTRE","919164319720","Diagnostics Labs","medistar-diagnostic-centre"],
+["249","Falnir Diagnostic Centre","919535630041","Diagnostics Labs","falnir-diagnostic-centre"],
+["250","KK DIAGNOSTIC LABORATORY","919964603227","Diagnostics Labs","kk-diagnostic-laboratory"],
+["251","KMC Central Lab","918242862562","Diagnostics Labs","kmc-central-lab"],
+["252","Mangalore Clinical Laboratory","918242440677","Diagnostics Labs","mangalore-clinical-laboratory"],
+["253","Global Diagnostics","918431213273","Diagnostics Labs","global-diagnostics"],
+["254","National CT Scanner & Diagnostic Center","918244267171","Diagnostics Labs","national-ct-scanner-diagnostic-center"],
+["255","Srivari sono scanning center","918129915636","Diagnostics Labs","srivari-sono-scanning-center"],
+["256","X-ray Point Kavoor","918197812114","Diagnostics Labs","x-ray-point-kavoor"],
+["257","HindLabs","919900700356","Diagnostics Labs","hindlabs"],
+["258","KAMC Hospital Scanning Centre","919677239787","Diagnostics Labs","kamc-hospital-scanning-centre"],
+["259","OroMax Imaging Centre","916362322099","Diagnostics Labs","oromax-imaging-centre"],
+["260","Panorama Dental Imaging","918242985560","Diagnostics Labs","panorama-dental-imaging"],
+["261","SURATHKAL CT SCAN CENTRE","918792050444","Diagnostics Labs","surathkal-ct-scan-centre"],
+["262","Scan Plus - Ultrasound scan clinic","918242410622","Diagnostics Labs","scan-plus-ultrasound-scan-clinic"],
+["263","Raj Pathology Lab and ultrasound scan","918242429491","Diagnostics Labs","raj-pathology-lab-and-ultrasound-scan-with-3d4d-an"],
+["264","Medicare X-rays","919449640306","Diagnostics Labs","medicare-x-rays"],
+["265","MEDICARE SCAN CENTRE","918244050973","Diagnostics Labs","medicare-scan-centre"],
+["266","Silverline Diagnostics","917899321435","Diagnostics Labs","silverline-diagnostics"],
+["267","Accurate Health Care Centre","919008635345","Diagnostics Labs","accurate-health-care-centre"],
+["268","GAMCA MANGALORE","919844679007","Diagnostics Labs","gamca-mangalore"],
+["269","Dr Vivek Kaje - Surgical Gastroenterology","917676894155","Diagnostics Labs","dr-vivek-kaje-surgical-gastroenterology-gi-cancer-"],
+["270","Dr.Hyder - Mangalore Center For Gastroenterology","918244251604","Diagnostics Labs","drhyder-mangalore-center-for-gastroenterology"],
+["271","Dr Rohan shetty","919400464277","Diagnostics Labs","dr-rohan-shetty"],
+["272","Raviraj Vittal Dr","918242437846","Diagnostics Labs","raviraj-vittal-dr"],
+["273","Nandikur Clinical Lab","918242429025","Diagnostics Labs","nandikur-clinical-lab"],
+["274","Sanjivani Clinical Laboratory","918244250825","Diagnostics Labs","sanjivani-clinical-laboratory"],
+["275","Apollo 24|7 Lab Test Kiocl Mangalore","918045572851","Diagnostics Labs","apollo-247-lab-test-kiocl-mangalore-dakshina-kanna"],
+["276","Tech Laboratory","919740588114","Diagnostics Labs","tech-laboratory"],
+["277","Health Care Diagnostics","918242494380","Diagnostics Labs","health-care-diagnostics"],
+["278","KOTTAKKAL ARYA VAIDYA SALA MEDICAL & PUNARVASU AYURVEDA CLINIC","918073864085","Alternative Medicine","kottakkal-arya-vaidya-sala-medical-punarvasu-ayurv"],
+["279","Sammitha Ayurveda Centre","919480635434","Alternative Medicine","sammitha-ayurveda-centre"],
+["280","Maanikya Ayurveda panchkarma therapy centre","918050280516","Alternative Medicine","maanikya-ayurveda-panchkarma-therapy-centre"],
+["281","Sanjeevini Ayurvedic Center","918762983171","Alternative Medicine","sanjeevini-ayurvedic-center"],
+["282","Yenepoya Ayurveda Health Center","918242439300","Alternative Medicine","yenepoya-ayurveda-health-center"],
+["283","Ashwini Ayurveda Clinic","919844276575","Alternative Medicine","ashwini-ayurveda-clinic"],
+["284","Siddhi Ayurvedalaya - ayurveda clinic","917411643394","Alternative Medicine","siddhi-ayurvedalaya-ayurveda-clinic"],
+["285","Dr. Harikrishna Bhat- Ayurveda in Mangaluru","919461209353","Alternative Medicine","dr-harikrishna-bhat-ayurveda-in-mangaluru"],
+["286","Canara Homeo clinic","919448483214","Alternative Medicine","canara-homeo-clinic"],
+["287","MANGALORE HOMOEOPATHIC PHARMACY","919980555914","Alternative Medicine","mangalore-homoeopathic-pharmacykankanady"],
+["288","Ruthu Homeo (Dr Haricharan H)","919986710221","Alternative Medicine","ruthu-homeo-dr-haricharan-h"],
+["289","Heal Homoeo clinic","919886635388","Alternative Medicine","heal-homoeo-clinic"],
+["290","Shri Homeopathic Clinic and Medical Pharma","919880028711","Alternative Medicine","shri-homeopathic-clinic-and-medical-pharma"],
+["291","SAMRAKSHAA HOMOEOPATHY Clinic and Dispensary","919008475565","Alternative Medicine","samrakshaa-homoeopathy-clinic-and-dispensary"],
+["292","Dr Shameema - Homeopathy Clinic","919036451521","Alternative Medicine","dr-shameema-homeopathy-clinic"],
+["293","Homeopathic Clinic","917026119111","Alternative Medicine","homeopathic-clinic"],
+["294","Sai Susheela Homoeopathy Clinic","919611814998","Alternative Medicine","sai-susheela-homoeopathy-clinic"],
+["295","Tiwari Homoeo Clinic","918242212097","Alternative Medicine","tiwari-homoeo-clinic"],
+["296","Prasad Homoeo Clinic","919448623395","Alternative Medicine","prasad-homoeo-clinic"],
+["297","Shree Dhanvantri Chikitsalaya","918747900033","Alternative Medicine","shree-dhanvantri-chikitsalaya"],
+["298","Innerpeace Nature Care","919520034747","Alternative Medicine","innerpeace-nature-care"],
+["299","Kshema Naturopathy Clinic","917349409842","Alternative Medicine","kshema-naturopathy-clinic"],
+["300","YENEPOYA NATUROPATHY & YOGA MEDICAL COLLEGE HOSPITAL","918494935215","Alternative Medicine","yenepoya-naturopathy-yoga-medical-college-hospital"],
+["301","Pranav Yoga & Naturopathy Centre","918242438487","Alternative Medicine","pranav-yoga-naturopathy-centre"],
+["302","Pranathi Ayurvedalaya","919448901493","Alternative Medicine","pranathi-ayurvedalaya"],
+["303","Ansh Ayurveda and Panchakarma Clinic","917259684431","Alternative Medicine","ansh-ayurveda-and-panchakarma-clinic"],
+["304","KARUNYA Life Ayurvedic Clinic and Panchakarma Center","919740656699","Alternative Medicine","karunya-life-ayurvedic-clinic-and-panchakarma-cent"],
+["305","Alva's Ayur Care","918242452444","Alternative Medicine","alvas-ayur-care"],
+["306","THE RUH HOLISTIC CARE","919535702818","Alternative Medicine","the-ruh-holistic-care"],
+["307","Sukha Wellness - Reflexology, Acupuncture & Onnuri Medicine","919187382520","Alternative Medicine","sukha-wellness-reflexology-acupuncture-onnuri-medi"],
+["308","KP WELLNESS CENTRE","918970520359","Alternative Medicine","kp-wellness-centre"],
+["309","Adya Health Care","918147966907","Alternative Medicine","adya-health-care"],
+["310","Shifa Unani And Hijama Clinic","919141451882","Alternative Medicine","shifa-unani-and-hijama-clinic"],
+["311","Dr Aisha Suha Shifa Unani Hijama Clinic","919633269331","Alternative Medicine","dr-aisha-suha-shifa-unani-hijama-clinic"],
+["312","Shaffi Herbal And Hijama Clinic","917204846993","Alternative Medicine","shaffi-herbal-and-hijama-clinic"],
+["313","Unani Hospital","919164286774","Alternative Medicine","unani-hospital"],
+["314","YogaVasista Yoga Therapy Centre","919164524452","Alternative Medicine","yogavasista-yoga-therapy-centre"],
+["315","Yogavidhya Therapy Centre","919449766364","Alternative Medicine","yogavidhya-therapy-centre"],
+["316","Devika Yoga Classes","919480563579","Alternative Medicine","devika-yoga-classes"],
+["317","Gayathri Yoga Kendra","919448337473","Alternative Medicine","gayathri-yoga-kendra"],
+["318","Yoga Kshema","918970219448","Alternative Medicine","yoga-kshema"],
+["319","BHAVAN'S YOGA CENTRE","918242427618","Alternative Medicine","bhavans-yoga-centre"],
+["320","Yoga Kuteera","919243301758","Alternative Medicine","yoga-kuteera"],
+["321","Yogada Satsanga Dhyana Kendra","919845047785","Alternative Medicine","yogada-satsanga-dhyana-kendra"],
+["322","GMCKS Pranic Healing & Arhatic Yoga Center, Dakshina Kannada","917892994513","Alternative Medicine","gmcks-pranic-healing-arhatic-yoga-center-dakshina-"],
+["323","Sahaja Yoga Meditation Centre - Mangaluru","919480328030","Alternative Medicine","sahaja-yoga-meditation-centre-mangaluru"],
+["324","The Therapy Room Mangalore","918971506444","Alternative Medicine","the-therapy-room-mangalore"],
+["325","Siddha Yoga Therapy Clinic","919535862201","Alternative Medicine","siddha-yoga-therapy-clinic"],
+["326","Arya Vaidya Sala, Kotakkal","919481822367","Alternative Medicine","arya-vaidya-sala-kotakkal"],
+["327","Tree of Life Ayurvedic Clinic & Medicals","919483030873","Alternative Medicine","tree-of-life-ayurvedic-clinic-medicals"],
+["328","Herbal Garden","919480158990","Alternative Medicine","herbal-garden"],
+["329","Palm Touch Ayurvedic Centre","918242225038","Alternative Medicine","palm-touch-ayurvedic-centre"],
+["330","tripta foundation deaddiction and rehabilitation center","919880064223","Alternative Medicine","tripta-foundation-deaddiction-and-rehabilitation-c"],
+["331","Prerana Wellness Center","919746030206","Alternative Medicine","prerana-wellness-center"],
+["332","Good Life Wellness Centre","919845046747","Alternative Medicine","good-life-wellness-centre"],
+["333","Soul Wellness centre","919513122999","Alternative Medicine","soul-wellness-centre"],
+["334","Sanjeevini Divine Holistic Wellness Centre","918073983493","Alternative Medicine","sanjeevini-divine-holistic-wellness-centre"],
+["335","Canara Ayurvedic","919900374382","Alternative Medicine","canara-ayurvedic"],
+["336","V-staar plus Lifestyle pvt ltd (stock point)","919964454067","Alternative Medicine","v-staar-plus-lifestyle-pvt-ltd-stock-point"],
+["337","New Ganapaya Ramdas Ayurveda House","919902456727","Alternative Medicine","new-ganapaya-ramdas-ayurveda-house"],
+["338","Dr Pratheeksha A Rao","919449516882","Alternative Medicine","dr-pratheeksha-a-rao"],
+["339","Yenepoya Ayurveda Medical College & Hospital","917026149955","Alternative Medicine","yenepoya-ayurveda-medical-college-hospital"],
+["340","DR HEMA M SHETTY ENT CLINIC","919845207248","ENT Ear Nose Throat","dr-hema-m-shetty-ent-clinic"],
+["341","Dr Deekshith Rajmohan - Ent and head and Neck","919620326298","ENT Ear Nose Throat","dr-deekshith-rajmohan-ent-and-head-and-neck-cochle"],
+["342","Family ENT Clinic","917259566881","ENT Ear Nose Throat","family-ent-clinic"],
+["343","Dr K S Dayakar Punjas ENT Clinic","918242441121","ENT Ear Nose Throat","dr-k-s-dayakar-punjas-ent-clinic"],
+["344","MANGALORE HEARING CENTRE","918296320960","ENT Ear Nose Throat","mangalore-hearing-centre"],
+["345","Varsha Prabhu (Audiologist/Hearing & Tinnitus specialist)","917019598367","ENT Ear Nose Throat","varsha-prabhu-audiologisthearing-tinnitus-speciali"],
+["346","Dr Y M Hegde","918242422221","ENT Ear Nose Throat","dr-y-m-hegde"],
+["347","Dr Don Gregory Mascarenhas","918073190995","ENT Ear Nose Throat","dr-don-gregory-mascarenhas"],
+["348","Dr Savita Lasrado","919945361819","ENT Ear Nose Throat","dr-savita-lasrado"],
+["349","Varaa clinics & diagnostics","917338330999","ENT Ear Nose Throat","varaa-clinics-diagnostics"],
+["350","Dr Vinay V Rao ENT Doctor","918050076660","ENT Ear Nose Throat","dr-vinay-v-rao-ent-doctor"],
+["351","Dr. Kishore Shetty","918242492466","ENT Ear Nose Throat","dr-kishore-shetty"],
+["352","Dr Sudheer K I Best Surgical Gastroenterologist","919611063731","Gastroenterology","dr-sudheer-k-i-best-surgical-gastroenterologist-i-"],
+["353","Dr. Kiran Revankar","917760227999","Gastroenterology","dr-kiran-revankar"],
+["354","Dr. D.R. Aruna","918243253910","Gastroenterology","dr-dr-aruna"],
+["355","Dr. Leo Francis Tauro, Consultant General and Laparoscopic Surgeon","918242222877","Gastroenterology","dr-leo-francis-tauro-consultant-general-and-laparo"],
+["356","Dr. Siddharth Mulki","919886060144","Gastroenterology","dr-siddharth-mulki"],
+["357","Dr K Jayarama Shenoy","919845083317","Gastroenterology","dr-k-jayarama-shenoy"],
+["358","Biswas Clinic, Best Ayurvedic Piles Doctor","917996578016","Gastroenterology","biswas-clinic-best-ayurvedic-piles-doctor-physioth"],
+["359","Sinha Clinic","918073763284","Gastroenterology","sinha-clinic"],
+["360","Doctors Lounge Polyclinic","919108618005","Gastroenterology","doctors-lounge-polyclinic"],
+["361","Shreematha Ayurvedic Clinic","919449331164","Gastroenterology","shreematha-ayurvedic-clinic"],
+["362","Mangalore Urologist Dr. Moideen Nafseer","918244303088","Gastroenterology","mangalore-urologist-dr-moideen-nafseer-urology-sur"],
+["363","Dr. Ashfaque Mohammed","918244263355","Gastroenterology","dr-ashfaque-mohammed"],
+["364","Mangalore Urology Centre","918242430091","Gastroenterology","mangalore-urology-centre"],
+["365","Dr Shreyas N.M- Best Urologist in Mangalore","918310537712","Urology","dr-shreyas-nm-best-urologist-in-mangalore"],
+["366","Dr. NARENDRA PAI - Urologist -FIRST UROLOGY - KIDNEY WELLNESS CLINIC","917022032121","Urology","dr-narendra-pai-urologist-first-urology-kidney-wel"],
+["367","Dr.Prajwal Ravinder -Urologist in Mangalore","919900264262","Urology","drprajwal-ravinder-urologist-in-mangalore"],
+["368","Dr Pritham Sharma, Urology Clinic","919886264949","Urology","dr-pritham-sharma-urology-clinic"],
+["369","Mangalore Kidney Care","919945087949","Urology","mangalore-kidney-care"],
+["370","Urology Research center & Kidney Stone Clinic","918242432126","Urology","urology-research-center-kidney-stone-clinic"],
+["371","UBreathe Clinic","919900924015","Urology","ubreathe-clinic"],
+["372","Dr. Raghavendra Nayak","918242225533","Urology","dr-raghavendra-nayak"],
+["373","Dr Susan Pradeep","919902707198","Urology","dr-susan-pradeep"],
+["374","Spoorthi Polyclinic","918242461001","Urology","spoorthi-polyclinic"],
+["375","Dr. Ashok Bhat (Nephrology) Clinic","916364079688","Urology","dr-ashok-bhat-nephrology-clinic"],
+["376","Kidney Care Clinic","918951414798","Urology","kidney-care-clinic"],
+["377","Dr. Aditya Shetty H.","918073345724","Urology","dr-aditya-shetty-h"],
+["378","Dr Anwitha Varmudy","918242221354","Urology","dr-anwitha-varmudy"],
+["379","Sparsha Medical Centre","918722703555","Urology","sparsha-medical-centre"],
+["380","FALNIR CHEST CLINIC","918884292616","Pulmonology Chest","falnir-chest-clinic"],
+["381","Suma Clinic","918242493441","Pulmonology Chest","suma-clinic"],
+["382","Lifeline Surgicare","919886047949","Pulmonology Chest","lifeline-surgicare"],
+["383","Dr Rohith Pinto - Physician Mangalore","916363828039","Pulmonology Chest","dr-rohith-pinto-physician-mangalore"],
+["384","Ashajit Physio clinic","919482787373","Pulmonology Chest","ashajit-physio-clinic"],
+["385","Dr Venugopala D Maithri Speciality Clinic","918242432929","Endocrinology Diabetes","dr-venugopala-d-maithri-speciality-clinic"],
+["386","Falnir Clinic","918242422167","Endocrinology Diabetes","falnir-clinic"],
+["387","Dr. Floyd Dsouza Best General Physician in Dakshina Kannada","918046961837","Endocrinology Diabetes","dr-floyd-dsouza-10-yrs-of-exp-best-general-physici"],
+["388","Dr. K. Shubakar Bhandary","918242444621","Endocrinology Diabetes","dr-k-shubakar-bhandary"],
+["389","Transform Health & Wellness Center","919844820318","Endocrinology Diabetes","transform-health-wellness-center"],
+["390","JM Ayurveda Clinic and Pharmacy","916362562134","Endocrinology Diabetes","jm-ayurveda-clinic-and-pharmacy"],
+["391","Midtown Clinic","919844633993","Endocrinology Diabetes","midtown-clinic"],
+["392","Spandana Centre for Metabolic Medicine","918242422972","Endocrinology Diabetes","spandana-centre-for-metabolic-medicine"],
+["393","Dr. Vidyadhar Shetty","918242217911","Endocrinology Diabetes","dr-vidyadhar-shetty"],
+["394","R R Nutrition center (wellness centre)","919686431155","Endocrinology Diabetes","r-r-nutrition-center-wellness-centre"],
+["395","Dr Poonam Santhosh","918197588883","Psychiatry Mental Health","dr-poonam-santhosh"],
+["396","Dr Denzil Pinto's Clinic","919448456821","Psychiatry Mental Health","dr-denzil-pintos-clinic"],
+["397","Stress Management with 30 days support","917829839538","Psychiatry Mental Health","stress-management-with-30-days-support"],
+["398","AA mangalore service centre","919964280840","Psychiatry Mental Health","aa-mangalore-service-centre"],
+["399","Shubham De Addiction and Rehabilitation Center","919481336319","Psychiatry Mental Health","shubham-de-addiction-and-rehabilitation-centerr"],
+["400","Dr Madhava Rao K S","918242440880","Psychiatry Mental Health","dr-madhava-rao-k-s"],
+["401","Family Life Service Centre","918242223797","Psychiatry Mental Health","family-life-service-centre"],
+["402","Shubhada Bhat Access consciousness Bars Facilitator","917204334676","Psychiatry Mental Health","shubhada-bhat-access-consciousness-bars-facilitato"],
+["403","Family Counselling Centre, ISS, Roshni Nilaya","918242434023","Psychiatry Mental Health","family-counselling-centre-iss-roshni-nilaya"],
+["404","Dr. Eugene Rent","919071064039","Oncology Cancer","dr-eugene-rent"],
+["405","Dr. Aravind","917892993532","Oncology Cancer","dr-aravind"],
+["406","Foster Home Health Care Services","918497037535","Oncology Cancer","foster-home-health-care-services"],
+["407","Head and neck cancer treatment","918828291749","Oncology Cancer","head-and-neck-cancer-treatment"],
+["408","weight lose waight gain wellness centre","919886361712","Surgical Specialists","weight-lose-waight-gain-wellness-centre"],
+["409","Dr. Kishore V Alapati. Consultant Colo-Rectal Surgeon","918062747434","Surgical Specialists","dr-kishore-v-alapati-consultant-colo-rectal-surgeo"],
+["410","BAJPE MEDICAL AND TRAUMA CENTRE","917204398469","Surgical Specialists","bajpe-medical-and-trauma-centre"],
+["411","Dr U Anand Kini","918147033640","Surgical Specialists","dr-u-anand-kini"],
+["412","Dr. Girish M","919480940814","General Family Medicine","dr-girish-m"],
+["413","Dr.Shenoy Devadas","918242458437","General Family Medicine","drshenoy-devadas"],
+["414","Dr. I. Nagraj Shetty Best Internal medicine specialist","919845082545","General Family Medicine","dr-i-nagraj-shetty-best-internal-medicine-speciali"],
+["415","Dr Roshan M","918242438221","General Family Medicine","dr-roshan-m"],
+["416","Dr Shihab Hassan (MBBS, MD)","919901724178","General Family Medicine","dr-shihab-hassan-mbbs-md"],
+["417","Dr. Vijay Gopal Rai","918242496093","General Family Medicine","dr-vijay-gopal-rai"],
+["418","PAI SQUARE CLINIC","919740084078","General Family Medicine","pai-square-clinic-dr-spoorthi-ashok-pai-dr-shruthi"],
+["419","sharada clinic","918244254705","General Family Medicine","sharada-clinic"],
+["420","Mangalore Health Care Private Limited","919916690734","General Family Medicine","mangalore-health-care-private-limited"],
+["421","Dr. Christopher Pais","918660270643","General Family Medicine","dr-christopher-pais"],
+["422","Parin Clinic","918494808333","General Family Medicine","parin-clinic"],
+["423","Family Clinic","918242457191","General Family Medicine","family-clinic"],
+["424","Good Health Clinic","919049000729","General Family Medicine","good-health-clinic"],
+["425","Jeppu Clinic","918242414192","General Family Medicine","jeppu-clinic"],
+["426","Geetha Krishna Clinic","919880933627","General Family Medicine","geetha-krishna-clinic"],
+["427","Kulal Health Centre","919448012028","General Family Medicine","kulal-health-centre"],
+["428","ULLAL MEDICAL CENTRE","918242494099","General Family Medicine","ullal-medical-centre"],
+["429","Arimala Polyclinic","918147827575","General Family Medicine","arimala-polyclinic"],
+["430","ECHS Polyclinic Mangalore","918242457549","General Family Medicine","echs-polyclinic-mangalore"],
+["431","Medoc Polyclinic","918686212103","General Family Medicine","medoc-polyclinic"],
+["432","Srinidhi Polyclinic & Diagnostics","916366292804","General Family Medicine","srinidhi-polyclinic-diagnostics"],
+["433","Amrutha poly clinic and diagnostics","918242443342","General Family Medicine","amrutha-poly-clinic-and-diagnostics"],
+["434","Ashraya Polyclinic","918242422201","General Family Medicine","ashraya-polyclinic"],
+["435","Sushruth Poly Clinic","918244111345","General Family Medicine","sushruth-poly-clinic"],
+["436","Manaswini Clinic","918242443973","General Family Medicine","manaswini-clinic"],
+["437","Dr. Devdas Hegde","918242422822","General Family Medicine","dr-devdas-hegde"],
+["438","Attavar Clinic","919845688599","General Family Medicine","attavar-clinic"],
+["439","Dr Ahamad Shaheel Sultan","919663759887","General Family Medicine","dr-ahamad-shaheel-sultan"],
+["440","Dr Renier Borges - Physician","918244256578","General Family Medicine","dr-renier-borges-physician"],
+["441","Dr Sayed Sirajuddeen","918792965147","General Family Medicine","dr-sayed-sirajuddeen"],
+["442","Harold Mascarenhas Dr","918242436822","General Family Medicine","harold-mascarenhas-dr"],
+["443","Dr. Uday B.Nayak","918242217128","General Family Medicine","dr-uday-bnayak"],
+["444","Lobo Flora Dr D","918242413352","General Family Medicine","lobo-flora-dr-d"],
+["445","Shetty Laxminarayana Dr M","918242415840","General Family Medicine","shetty-laxminarayana-dr-m"],
+["446","KALYAN CLINIC","918792024717","General Family Medicine","kalyan-clinic"],
+["447","Dr Muralidhara Yadiyal B.chethana clinic","918242215033","General Family Medicine","dr-muralidhara-yadiyal-bchethana-clinic"],
+["448","Rathi Devi Dr R","918242416558","General Family Medicine","rathi-devi-dr-r"],
+["449","Svaasthya Care Clinic","919036464446","General Family Medicine","svaasthya-care-clinic"],
+["450","Dr. Mukhtarahmed. B.","919241409310","General Family Medicine","dr-mukhtarahmed-b"],
+["451","Medicity clinic","919897272206","General Family Medicine","medicity-clinic"],
+["452","Kallimar Clinic","919448253966","General Family Medicine","kallimar-clinic"],
+["453","Dr E V Suranjan Maben","918242423872","General Family Medicine","dr-e-v-suranjan-maben"],
+["454","Shri Laxmi Ayurvedic Clinic","917022092130","General Family Medicine","shri-laxmi-ayurvedic-clinic"],
+["455","Urwa dental care","919740613209","General Family Medicine","urwa-dental-care"],
+["456","Dr Ashok KR","919243306956","General Family Medicine","dr-ashok-kr"],
+["457","Chilimbi clinic","919886515459","General Family Medicine","chilimbi-clinic"],
+["458","Dr Rekha P V ,BHMS Homoeopathic Physician","919744732035","General Family Medicine","dr-rekha-p-v-bhms-homoeopathic-physician-yashaswin"],
+["459","Home Care Physiotherapy","919663494681","Rehabilitation Therapy","home-care-physiotherapy"],
+["460","Echoes Speech & Hearing Clinic","917795198300","Rehabilitation Therapy","echoes-speech-hearing-clinic"],
+["461","ASHA Physiotherapy Clinic and Neuro Rehab Centre","919901869628","Rehabilitation Therapy","asha-physiotherapy-clinic-and-neuro-rehab-centre-d"],
+["462","Janapriya H E A L. REHAB Centre","919895825795","Rehabilitation Therapy","janapriya-h-e-a-l-rehab-centre"],
+["463","Dr Mohammad Rameez","919747774111","Rehabilitation Therapy","dr-mohammad-rameez"],
+["464","Raj clinic","918217605546","Rehabilitation Therapy","raj-clinic"],
+["465","Cera Care Exercise Therapy","917411877961","Rehabilitation Therapy","cera-care-exercise-therapy"],
+["466","KP WELLNESS PRODUCTS","919886288292","Rehabilitation Therapy","kp-wellness-products"],
+["467","Lab Tech Inc.","919141334399","Dental Extra","lab-tech-inc"],
+["468","SK Dental Art","918970878904","Dental Extra","sk-dental-art"],
+["469","Eledent Smile Studio-Dental Clinic","918242494222","Dental Extra","eledent-smile-studio-dental-clinic"],
+["470","Chatra's Dental Speciality Clinic & Dental X-Rays","918242427176","Dental Extra","chatras-dental-speciality-clinic-dental-x-rays"],
+["471","Colaco Dental Clinic","919900813831","Dental Extra","colaco-dental-clinic"],
+["472","The Dental Care Clinic","919845691849","Dental Extra","the-dental-care-clinic"],
+["473","SHINE DENTAL CLINIC","917022464777","Dental Extra","shine-dental-clinic"],
+["474","kamalini Dental Clinic - Dr Mayur Hegde","917259964144","Dental Extra","kamalini-dental-clinic-dr-mayur-hegde"],
+["475","Face And Dental Care - Dent Align","918242441600","Dental Extra","face-and-dental-care-dent-align"],
+["476","Mahalasa Dental Clinic","919480470367","Dental Extra","mahalasa-dental-clinic"],
+["477","Multi Speciality Dental Clinic","919886103404","Dental Extra","multi-speciality-dental-clinic"],
+["478","AJ Institute of Dental Sciences","919547343882","Dental Extra","aj-institute-of-dental-sciences"],
+["479","Dr. Shruthi P. Puthran Child Physiotherapist","917022476969","Pediatrics Extra","dr-shruthi-p-puthran-child-physiotherapist"],
+["480","Arogyam Children's Clinic Pediatrician Child Specialist","916360110030","Pediatrics Extra","arogyam-childrens-clinic-pediatrician-child-specia"],
+["481","LAEL Education Institute- IELTS CELBAN OET Language classes","917899468378","Pediatrics Extra","lael-education-institute-ielts-celban-oet-i-langua"],
+["482","Home collection for agilus diagnostics","917090104444","Diagnostics Extra","home-collection-for-agilus-diagnostics"],
+["483","Kushi Clinical Laboratory","918088407534","Diagnostics Extra","kushi-clinical-laboratory-home-sample-collection-a"],
+["484","KMC Lab Sample Collection Centre","917022251308","Diagnostics Extra","kmc-lab-sample-collection-centre"],
+["485","Medicare Laboratory","918242445074","Diagnostics Extra","medicare-laboratory"],
+["486","Tanvi Medical Center","918242565776","Cardiology Extra","tanvi-medical-center"],
+["487","BHARATH IT DISTRIBUTORS, Mangalore","918217268016","Cardiology Extra","bharath-it-distributors-mangalore"],
+["488","Manframe Computers","919448363858","Cardiology Extra","manframe-computers"],
+["489","Shri Sai Clinic","919449207505","Locality Hampankatta Lalbagh Bunder","shri-sai-clinic"],
+["490","Pai Dental Multispeciality Clinic","919845231224","Locality Hampankatta Lalbagh Bunder","pai-dental-multispeciality-clinic"],
+["491","Dr.M.S.RAVI ORTHODONTICS and INVISALIGN SPECIALIST","919845221386","Locality Hampankatta Lalbagh Bunder","drmsravi-orthodontics-and-invisalign-specialist-de"],
+["492","Dental Speciality Clinic","919980277112","Locality Hampankatta Lalbagh Bunder","dental-speciality-clinic"],
+["493","Dr Mehboob Khan","919844569224","Locality Hampankatta Lalbagh Bunder","dr-mehboob-khan"],
+["494","CANARA CLINIC","919964280608","Locality Hampankatta Lalbagh Bunder","canara-clinic"],
+["495","Dr Anmol A. Baleri","918971587517","Locality Hampankatta Lalbagh Bunder","dr-anmol-a-baleri"],
+["496","Dr. Nithish M Bhandary","919448023147","Locality Hampankatta Lalbagh Bunder","dr-nithish-m-bhandary"],
+["497","Sri Devi Nursing Home","918242491408","Locality Hampankatta Lalbagh Bunder","sri-devi-nursing-home"],
+["498","Shaffi Ayurvedic Nursing Home","918242242583","Locality Hampankatta Lalbagh Bunder","shaffi-ayurvedic-nursing-home"],
+["499","Krishna Nursing Home - MIO Hospital","918242493344","Locality Hampankatta Lalbagh Bunder","krishna-nursing-home-mio-hospital-krishna-nursing-"],
+["500","Glenview Nursing Home","918242212887","Locality Hampankatta Lalbagh Bunder","glenview-nursing-home"],
+["501","SANJEEVAN - A Center for Elderly Home Care with Love","918123769885","Locality Hampankatta Lalbagh Bunder","sanjeevan-a-center-for-elderly-home-care-with-love"],
+["502","Dr.K. Jayarama Shenoy","918242493707","Locality Hampankatta Lalbagh Bunder","drk-jayarama-shenoy"],
+["503","Dr B Devadas Rai's Clinic","918242493700","Locality Hampankatta Lalbagh Bunder","dr-b-devadas-rais-clinic"],
+["504","Dr Jayaprakash Rao","918242440306","Locality Hampankatta Lalbagh Bunder","dr-jayaprakash-rao"],
+["505","Rai Dental Clinic","917483609476","Locality Hampankatta Lalbagh Bunder","rai-dental-clinic"],
+["506","Dr R N Sujeer","918242440392","Locality Hampankatta Lalbagh Bunder","dr-r-n-sujeer"],
+["507","Kodial Medicals","918244250323","Locality Hampankatta Lalbagh Bunder","kodial-medicals"],
+["508","Ganesh Medical Store","919148749599","Locality Hampankatta Lalbagh Bunder","ganesh-medical-store"],
+["509","Sharavu Medical","919343561717","Locality Hampankatta Lalbagh Bunder","sharavu-medical"],
+["510","Jan Sanjivni Generic Medicine Store","918242442814","Locality Hampankatta Lalbagh Bunder","jan-sanjivni-generic-medicine-store"],
+["511","Shirdi Baba Medical Stores","918242444844","Locality Hampankatta Lalbagh Bunder","shirdi-baba-medical-stores"],
+["512","Unity Medicals","918242440324","Locality Hampankatta Lalbagh Bunder","unity-medicals"],
+["513","Janani Medicals","918242428233","Locality Hampankatta Lalbagh Bunder","janani-medicals"],
+["514","City Medical Centre","918242442688","Locality Hampankatta Lalbagh Bunder","city-medical-centre"],
+["515","Second Hand Medical Books and Accessories Store","917483779156","Locality Hampankatta Lalbagh Bunder","second-hand-medical-books-and-accessories-store"],
+["516","J & J De Chane Agency & Medicals","918244251513","Locality Hampankatta Lalbagh Bunder","j-j-de-chane-agency-medicals"],
+["517","Priya's Life Care Medicals","918244267888","Locality Hampankatta Lalbagh Bunder","priyas-life-care-medicals"],
+["518","Vinayaka Pharma","918242219753","Locality Hampankatta Lalbagh Bunder","vinayaka-pharma"],
+["519","Nayak Distributors","917411055412","Locality Hampankatta Lalbagh Bunder","nayak-distributors"],
+["520","Baby Medicals","917022380222","Locality Hampankatta Lalbagh Bunder","baby-medicals"],
+["521","LOBOS DIAGNOSTICS & PHARMA","917022752525","Locality Hampankatta Lalbagh Bunder","lobos-diagnostics-pharma"],
+["522","Pradhan Mantri Bhartiya Janaushadhi kendra","916361511456","Locality Hampankatta Lalbagh Bunder","pradhan-mantri-bhartiya-janaushadhi-kendra"],
+["523","M.S Medicals","918242222852","Locality Hampankatta Lalbagh Bunder","ms-medicals"],
+["524","Pioneer Medicals","918242211662","Locality Hampankatta Lalbagh Bunder","pioneer-medicals"],
+["525","Mediplus Diagnostic Centre","918242427813","Locality Hampankatta Lalbagh Bunder","mediplus-diagnostic-centre"],
+["526","Nithyananda Eye Clinic","918242420100","Locality Hampankatta Lalbagh Bunder","nithyananda-eye-clinic"],
+["527","Bhat Usha Dr G K","918242436243","Locality Kankanady Bondel Valencia","bhat-usha-dr-g-k"],
+["528","Dental Clinic","919844990681","Locality Kankanady Bondel Valencia","dental-clinic"],
+["529","The Dental Office","917892029550","Locality Kankanady Bondel Valencia","the-dental-office"],
+["530","noble dental care - A complete family dental care","919739612504","Locality Kankanady Bondel Valencia","noble-dental-care-a-complete-family-dental-care"],
+["531","Dr.Aparna Amin's Aesthetika Skin clinic","918050248080","Locality Kankanady Bondel Valencia","draparna-amins-aesthetika-skin-clinic"],
+["532","Vriddhi Skin Clinic","919886121497","Locality Kankanady Bondel Valencia","vriddhi-skin-clinic"],
+["533","Trinity Eye Care","918242434161","Locality Kankanady Bondel Valencia","trinity-eye-care"],
+["534","Vision Optics Dr.Nelly Nazareth","918050980295","Locality Kankanady Bondel Valencia","vision-optics-drnelly-nazareth"],
+["535","Dr. Shamshad Ahmad Khan","919945445445","Locality Kankanady Bondel Valencia","dr-shamshad-ahmad-khan"],
+["536","Dr Kavitha D'souza","918244271970","Locality Kankanady Bondel Valencia","dr-kavitha-dsouza"],
+["537","Kankanady Medicals","918244277739","Locality Kankanady Bondel Valencia","kankanady-medicals"],
+["538","Jan Aushadhi Kendra","919108895902","Locality Kankanady Bondel Valencia","jan-aushadhi-kendra"],
+["539","Smart Medicals","917899286762","Locality Kankanady Bondel Valencia","smart-medicals"],
+["540","noble medicals","918147821619","Locality Kankanady Bondel Valencia","noble-medicals"],
+["541","Alpha Medicals","918244268800","Locality Kankanady Bondel Valencia","alpha-medicals"],
+["542","Sri Raghavendra Pharma","918762451679","Locality Kankanady Bondel Valencia","sri-raghavendra-pharma"],
+["543","RAI CLINIC (Dr Pratheeksha Rai)","919380639112","Locality Balmatta Falnir Barke","rai-clinic-dr-pratheeksha-rai"],
+["544","Raksha Clinic","919449235117","Locality Balmatta Falnir Barke","raksha-clinic"],
+["545","Vedashree Clinic","919845278793","Locality Balmatta Falnir Barke","vedashree-clinic"],
+["546","Suresh K Home Nursing Services in Mangalore","917026992174","Locality Balmatta Falnir Barke","suresh-k-home-nursing-services-in-mangalore"],
+["547","Pearlescent Dental Care","918971594925","Locality Balmatta Falnir Barke","pearlescent-dental-care"],
+["548","Dr. Gautham Hegde","918242441756","Locality Balmatta Falnir Barke","dr-gautham-hegde"],
+["549","Dr. K. Nillan Shetty","918242448815","Locality Balmatta Falnir Barke","dr-k-nillan-shetty"],
+["550","Dr Mahesh Nair","919448038015","Locality Balmatta Falnir Barke","dr-mahesh-nair"],
+["551","Dr Rashmi Polnaya","919844763878","Locality Balmatta Falnir Barke","dr-rashmi-polnaya"],
+["552","Dr. Anupama Suresh Y.","918242446618","Locality Balmatta Falnir Barke","dr-anupama-suresh-y"],
+["553","National Medicals","918904523008","Locality Balmatta Falnir Barke","national-medicals"],
+["554","Pharmacy","918242443132","Locality Balmatta Falnir Barke","pharmacy"],
+["555","Healthcare Medicals","918217623604","Locality Balmatta Falnir Barke","healthcare-medicals"],
+["556","Welcare Medicals","918242424808","Locality Balmatta Falnir Barke","welcare-medicals"],
+["557","Srinivas Medical Hall","918242429624","Locality Balmatta Falnir Barke","srinivas-medical-hall"],
+["558","Sri Laxmi Medicals","918242444273","Locality Balmatta Falnir Barke","sri-laxmi-medicals"],
+["559","Kudla Medicals","918242441496","Locality Balmatta Falnir Barke","kudla-medicals"],
+["560","City Drug House","918242217357","Locality Balmatta Falnir Barke","city-drug-house"],
+["561","Lifeline Pharma","918244269797","Locality Balmatta Falnir Barke","lifeline-pharma"],
+["562","Vishal Pharma","918242440485","Locality Balmatta Falnir Barke","vishal-pharma"],
+["563","PROLAB The Professional Colour Lab","918244253728","Locality Balmatta Falnir Barke","prolab-the-professional-colour-lab"],
+["564","Dr.Yogesh Kumar","918242430678","Locality Balmatta Falnir Barke","dryogesh-kumar"],
+["565","Dr.Rama Mohan Rao Clinic","919845196232","Locality Bejai Kadri Mangaladevi","drrama-mohan-rao-clinic"],
+["566","Dr. Dileep K.S","919483530166","Locality Bejai Kadri Mangaladevi","dr-dileep-ks"],
+["567","Sri Sathya Sai Clinic","918242415442","Locality Bejai Kadri Mangaladevi","sri-sathya-sai-clinic"],
+["568","Jeeth Clinic","918242418738","Locality Bejai Kadri Mangaladevi","jeeth-clinic"],
+["569","GM CLINICS","918105167925","Locality Bejai Kadri Mangaladevi","gm-clinics"],
+["570","Darussalam Clinic","918050775019","Locality Bejai Kadri Mangaladevi","darussalam-clinic"],
+["571","Mangala Health Centre","917619451245","Locality Bejai Kadri Mangaladevi","mangala-health-centre"],
+["572","Boloors Eye And Dental Care Centre","919845114652","Locality Bejai Kadri Mangaladevi","boloors-eye-and-dental-care-centre"],
+["573","Prema Eye Clinic","919632098689","Locality Bejai Kadri Mangaladevi","prema-eye-clinic"],
+["574","Rajkumar Clement Dr","918242411954","Locality Bejai Kadri Mangaladevi","rajkumar-clement-dr"],
+["575","Healthcare clinical laboratory","919845887541","Locality Bejai Kadri Mangaladevi","healthcare-clinical-laboratory"],
+["576","MediWorld Pharma, Bejai","918050128255","Locality Bejai Kadri Mangaladevi","mediworld-pharma-bejai"],
+["577","Bejai Medical Stores","919480288471","Locality Bejai Kadri Mangaladevi","bejai-medical-stores"],
+["578","Shabari Medicals (urgent medicine delivery)","919480487444","Locality Bejai Kadri Mangaladevi","shabari-medicals-urgent-medicine-delivery"],
+["579","Kuntikana Medicals","918242241166","Locality Bejai Kadri Mangaladevi","kuntikana-medicals"],
+["580","MANJUSHREE AGENCIES MEDICALS AND SURGICALS","918244278845","Locality Bejai Kadri Mangaladevi","manjushree-agencies-medicals-and-surgicals"],
+["581","Dr.Harish Rao K, Dr Divakar Rao, Dr Avinash G Kamath","918242495767","Locality Bejai Kadri Mangaladevi","drharish-rao-k-dr-divakar-rao-dr-avinash-g-kamath-"],
+["582","Dr Bharathraj Peadiatricfalnir sanjeevni building","918244256272","Locality Bejai Kadri Mangaladevi","dr-bharathraj-peadiatricfalnir-sanjeevni-building"],
+["583","Medicare Plus","918242216155","Locality Bejai Kadri Mangaladevi","medicare-plus"],
+["584","Anthara Medicals","919986596486","Locality Bejai Kadri Mangaladevi","anthara-medicals"],
+["585","Siddharth M Shetty","918244050543","Locality Bejai Kadri Mangaladevi","siddharth-m-shetty"],
+["586","krishna clinic shanthala aashiyana","918277216186","Locality Bejai Kadri Mangaladevi","krishna-clinic-shanthala-aashiyana"],
+["587","Shrinivasa Clinic","919964279421","Locality Urwa Kulur Pumpwell","shrinivasa-clinic"],
+["588","Vimala Clinic","919448587913","Locality Urwa Kulur Pumpwell","vimala-clinic"],
+["589","Dr B K Vishwanath","918242458000","Locality Urwa Kulur Pumpwell","dr-b-k-vishwanath"],
+["590","Jyothi Clinic","919448215315","Locality Urwa Kulur Pumpwell","jyothi-clinic"],
+["591","Kuloor Dental Clinic","918242450727","Locality Urwa Kulur Pumpwell","kuloor-dental-clinic"],
+["592","KULUR MEDICALS","917760392529","Locality Urwa Kulur Pumpwell","kulur-medicals"],
+["593","Shrisha Kumar Dr","918242458186","Locality Urwa Kulur Pumpwell","shrisha-kumar-dr"],
+["594","Vriksha Dental Care","919353524435","Locality Urwa Kulur Pumpwell","vriksha-dental-care"],
+["595","Bhuvina Multispeciality dental clinic","918242459930","Locality Urwa Kulur Pumpwell","bhuvina-multispeciality-dental-clinic"],
+["596","Ora Dental Clinic (Dr. Shanthi Kiran)","919449591888","Locality Urwa Kulur Pumpwell","ora-dental-clinic-dr-shanthi-kiran-bsc-bds-mds"],
+["597","Dental Care Centre","919845311288","Locality Urwa Kulur Pumpwell","dental-care-centre"],
+["598","Ghous Dental Multispeciality Clinic","918792581678","Locality Urwa Kulur Pumpwell","ghous-dental-multispeciality-clinic"],
+["599","MBG INTERNATIONAL","918792808219","Locality Urwa Kulur Pumpwell","mbg-international"],
+["600","Citipoint Medicals","918242430077","Locality Urwa Kulur Pumpwell","citipoint-medicals"],
+["601","GATTY MEDICALS","917996878763","Locality Urwa Kulur Pumpwell","gatty-medicals"],
+["602","Iicon polyclinic and medicals","919481731276","Locality Urwa Kulur Pumpwell","iicon-polyclinic-and-medicals"],
+["603","SAHANA MEDICALS","919945548830","Locality Urwa Kulur Pumpwell","sahana-medicals"],
+["604","Soorya Lifecare","918244268484","Locality Urwa Kulur Pumpwell","soorya-lifecare"],
+["605","Dr Sowmya K, Obstetrician and Gynaecologist","918951018504","Locality Urwa Kulur Pumpwell","dr-sowmya-k-obstetrician-and-gynaecologist-athikar"],
+["606","Sehat Clinic and health store","919113532193","Locality Urwa Kulur Pumpwell","sehat-clinic-and-health-store"],
+["607","Derebail Clinic & Clinical Laboratory","919844086539","Locality Derebail Konchady Kottara","derebail-clinic-clinical-laboratory"],
+["608","Nayak Surendra Dr K","918242427957","Locality Derebail Konchady Kottara","nayak-surendra-dr-k"],
+["609","Chirayu Clinic (Dr.Devika Rai & Dr.Subhash Rai)","919620310633","Locality Derebail Konchady Kottara","chirayu-clinic-drdevika-rai-drsubhash-rai"],
+["610","Dr K P Shenoy, Manjunatha Clinic","919880160140","Locality Derebail Konchady Kottara","dr-k-p-shenoy-manjunatha-clinic"],
+["611","Bhat Vivekananda Sujatha Dr","918242459603","Locality Derebail Konchady Kottara","bhat-vivekananda-sujatha-dr"],
+["612","Dr D Umesh Naik","918242437800","Locality Derebail Konchady Kottara","dr-d-umesh-naik"],
+["613","Dr Ravindranath Rai H","918242443746","Locality Derebail Konchady Kottara","dr-ravindranath-rai-h"],
+["614","Thunga Ravish Dr A","918242438839","Locality Derebail Konchady Kottara","thunga-ravish-dr-a"],
+["615","SWAASTHYA CLINIC","916361180905","Locality Derebail Konchady Kottara","swaasthya-clinic"],
+["616","Kodikal Clinic","918431497186","Locality Derebail Konchady Kottara","kodikal-clinic"],
+["617","Satyashri dental clinic","919886970917","Locality Derebail Konchady Kottara","satyashri-dental-clinic"],
+["618","Sandhya Dental Clinic","918242458477","Locality Derebail Konchady Kottara","sandhya-dental-clinic"],
+["619","Kottara Medicals","916361022632","Locality Derebail Konchady Kottara","kottara-medicals"],
+["620","Tashi Dental Speciality Clinic","918197500600","Locality Derebail Konchady Kottara","tashi-dental-speciality-clinic"],
+["621","Happy Teeth Dental Clinic","919742089944","Locality Derebail Konchady Kottara","happy-teeth-dental-clinic"],
+["622","Akshaya Associates","919035270820","Locality Derebail Konchady Kottara","akshaya-associates"],
+["623","Dynamic Meditour","919844990059","Locality Derebail Konchady Kottara","dynamic-meditour"],
+["624","Shastri Ayurveda & Medical Centre","918242495824","Locality Derebail Konchady Kottara","shastri-ayurveda-medical-centre"],
+["625","Shree Devi Medicals","919845213722","Locality Derebail Konchady Kottara","shree-devi-medicals"],
+["626","AY MEDICALS","918867235999","Locality Derebail Konchady Kottara","ay-medicals"],
+["627","MediWorld Pharmaceutical distribution","919108941449","Locality Derebail Konchady Kottara","mediworld-pharmaceutical-distribution"],
+["628","Sai Ganesh Medical","919535332230","Locality Derebail Konchady Kottara","sai-ganesh-medical-sai-ganesh-medical"],
+["629","Durga Pharmacy","919663459188","Locality Derebail Konchady Kottara","durga-pharmacy"],
+["630","Vaibhava Laxmi Medicals","918147702737","Locality Derebail Konchady Kottara","vaibhava-laxmi-medicals"],
+["631","PRADHANMANTRI BHARATAIYA JANAUSHADHI KENDRA","919483499607","Locality Derebail Konchady Kottara","pradhanmantri-bharataiya-janaushadhi-kendra"],
+["632","MEDILIFE CLINIC & LAB (AGILUS DIAGNOSTICS)","918431769370","Locality Derebail Konchady Kottara","medilife-clinic-lab-sample-processed-agilus-diagno"],
+["633","Bhandary Balnath Dr K","918242415534","Locality Derebail Konchady Kottara","bhandary-balnath-dr-k"],
+["634","Sona eye care clinic","919738423377","Locality Derebail Konchady Kottara","sona-eye-care-clinic"],
+["635","Kusuma Medicals","918197525329","Locality Derebail Konchady Kottara","kusuma-medicals"],
+["636","Sathva Retail","919886859266","Locality Derebail Konchady Kottara","sathva-retail"],
+["637","Dr Amar D N, Sanjeevani clinic","918861097763","Locality Surathkal Mulki Hejamady","dr-amar-d-n-sanjeevani-clinic"],
+["638","Zohara Clinic","919663497641","Locality Surathkal Mulki Hejamady","zohara-clinic"],
+["639","SHRI RAGHAVENDRA CLINIC","917349687436","Locality Surathkal Mulki Hejamady","shri-raghavendra-clinic"],
+["640","Dr. Sunil's Medi Clinic & Daycare Centre","918242983662","Locality Surathkal Mulki Hejamady","dr-sunils-medi-clinic-daycare-centre"],
+["641","H K Medical Centre","917348962478","Locality Surathkal Mulki Hejamady","h-k-medical-centre"],
+["642","Padmavathi Hospital","918242476600","Locality Surathkal Mulki Hejamady","padmavathi-hospital"],
+["643","Dr deepalakshmi tanthry, ENT specialist","919480047494","Locality Surathkal Mulki Hejamady","dr-deepalakshmi-tanthry-ent-specialist-opposite-go"],
+["644","Venus Hospital","918242475718","Locality Surathkal Mulki Hejamady","venus-hospital"],
+["645","Misquith Hospital","919980132430","Locality Surathkal Mulki Hejamady","misquith-hospital"],
+["646","Karnad clinic","917975675591","Locality Surathkal Mulki Hejamady","karnad-clinic"],
+["647","Smile Care Multi Speciality Dental Clinic","919611821064","Locality Surathkal Mulki Hejamady","smile-care-multi-speciality-dental-clinic"],
+["648","Arogya Raksha Sanjeevini Nati Madu","919483767708","Locality Surathkal Mulki Hejamady","arogya-raksha-sanjeevini-nati-madu"],
+["649","Hi Tech Diagnostic Laboratory","918867311618","Locality Surathkal Mulki Hejamady","hi-tech-diagnostic-laboratory"],
+["650","SRI DEVI CLINIC","919964347440","Locality Surathkal Mulki Hejamady","sri-devi-clinic"],
+["651","Dr Nishank S Shettigar MBBS,DNB General Medicine","918242282491","Locality Surathkal Mulki Hejamady","dr-nishank-s-shettigar-mbbsdnb-general-medicine"],
+["652","Dr Dhananjaya H Bhat Consultant Ayurvedic Physician","919538371318","Locality Surathkal Mulki Hejamady","dr-dhananjaya-h-bhat-consultant-ayurvedic-physicia"],
+["653","Parivar.. Home for aged","919449247744","Locality Surathkal Mulki Hejamady","parivar-home-for-aged"],
+["654","Dr Caroline Joan Vas,Dharma Nursing Home","919901768430","Locality Surathkal Mulki Hejamady","dr-caroline-joan-vasdharma-nursing-home"],
+["655","Urja Home Nursing Services and Pendulum Healing","919449675446","Locality Surathkal Mulki Hejamady","urja-home-nursing-services-and-pendulum-healing"],
+["656","Salwa Dental Speciality Clinic","917026082006","Locality Surathkal Mulki Hejamady","salwa-dental-speciality-clinic"],
+["657","DR AJAY A KUDVA","918095428199","Locality Surathkal Mulki Hejamady","dr-ajay-a-kudva"],
+["658","Sai Ortho care - Dr Dinesh","919448719297","Locality Surathkal Mulki Hejamady","sai-ortho-care-dr-dinesh"],
+["659","Dr Shravan Shetty","919686155612","Locality Surathkal Mulki Hejamady","dr-shravan-shetty"],
+["660","Dr.Sanija's Multi Speciality Dental Clinic","919739316650","Locality Surathkal Mulki Hejamady","drsanijas-multi-speciality-dental-clinic"],
+["661","Nambiar's Dental Clinic","919880130696","Locality Surathkal Mulki Hejamady","nambiars-dental-clinic"],
+["662","Sai Dental Care","919036941534","Locality Surathkal Mulki Hejamady","sai-dental-care"],
+["663","Shetty's Dental Clinic","918242476099","Locality Surathkal Mulki Hejamady","shettys-dental-clinic"],
+["664","Opal Dental Care","917259437999","Locality Surathkal Mulki Hejamady","opal-dental-care"],
+["665","Dr.Bhaskar's Dental Care Unit","919916263577","Locality Surathkal Mulki Hejamady","drbhaskars-dental-care-unit"],
+["666","Durgamba Dental Clinic","917204066209","Locality Surathkal Mulki Hejamady","durgamba-dental-clinic"],
+["667","Viveka dental care clinic","918867224278","Locality Surathkal Mulki Hejamady","viveka-dental-care-clinic"],
+["668","Dr Aysha's dental clinic","919535561818","Locality Surathkal Mulki Hejamady","dr-ayshas-dental-clinic"],
+["669","Expert Dental Care","919902468799","Locality Surathkal Mulki Hejamady","expert-dental-care"],
+["670","Telipu Dental studio","917996167976","Locality Surathkal Mulki Hejamady","telipu-dental-studio"],
+["671","Dental Care Unit","919986785384","Locality Surathkal Mulki Hejamady","dental-care-unit"],
+["672","Dental Clinic and Surgery","918242475973","Locality Surathkal Mulki Hejamady","dental-clinic-and-surgery"],
+["673","VIJAY MEDICALS","918884435855","Locality Surathkal Mulki Hejamady","vijay-medicals"],
+["674","Ishaanvi Polyclinic & Diagnostic Centre","917204066769","Locality Surathkal Mulki Hejamady","ishaanvi-polyclinic-diagnostic-centre"],
+["675","Sonar Scan","918242475522","Locality Surathkal Mulki Hejamady","sonar-scan"],
+["676","Life care medical 24/7","919035110415","Locality Surathkal Mulki Hejamady","life-care-medical-247"],
+["677","Khushi Medicals","919743527587","Locality Surathkal Mulki Hejamady","khushi-medicals"],
+["678","Leela Pharma","919380928350","Locality Surathkal Mulki Hejamady","leela-pharma"],
+["679","SURABHI MEDICALS","919035353297","Locality Surathkal Mulki Hejamady","surabhi-medicals"],
+["680","S M Medicals","917090294000","Locality Surathkal Mulki Hejamady","s-m-medicals"],
+["681","MEDLIFE PHARMA","918105282532","Locality Surathkal Mulki Hejamady","medlife-pharma"],
+["682","Grace Speciality Homeopathy Clinic","917349422509","Locality Surathkal Mulki Hejamady","grace-speciality-homeopathy-clinic"],
+["683","Lakshmi Medicals","918242476872","Locality Surathkal Mulki Hejamady","lakshmi-medicals"],
+["684","Niketh Clinical Laboratory","918244278839","Locality Surathkal Mulki Hejamady","niketh-clinical-laboratory"],
+["685","SURATHKAL DIAGNOSIS","916362862649","Locality Surathkal Mulki Hejamady","surathkal-diagnosis"],
+["686","Suraksha Clinical Laboratory","919449546861","Locality Surathkal Mulki Hejamady","suraksha-clinical-laboratory"],
+["687","Surathkal Clinical Laboratory","918242477135","Locality Surathkal Mulki Hejamady","surathkal-clinical-laboratory"],
+["688","AL-SHIFA EYE CARE","917090852736","Locality Surathkal Mulki Hejamady","al-shifa-eye-care"],
+["689","Russel Opticals","918242476841","Locality Surathkal Mulki Hejamady","russel-opticals"],
+["690","Kiran Opticals & Eye Testing Centre","919448240485","Locality Surathkal Mulki Hejamady","kiran-opticals-eye-testing-centre"],
+["691","Dr Jyothi Harish Rao Gynecologist","918242476766","Locality Surathkal Mulki Hejamady","dr-jyothi-harish-rao-gynecologist"],
+["692","Chirashree Polyclinic","919731393769","Locality Surathkal Mulki Hejamady","chirashree-polyclinic"],
+["693","Sai physiotherapy clinic and rehabilitation","919108850612","Locality Surathkal Mulki Hejamady","sai-physiotherapy-clinic-and-rehabilitation"],
+["694","Dr Anup Narayan Bhat Physiotheraphy Clinic","918147162662","Locality Surathkal Mulki Hejamady","dr-anup-narayan-bhat-physiotheraphy-clinic"],
+["695","Sanjeevini Clinic","919964447549","Locality Surathkal Mulki Hejamady","sanjeevini-clinic"],
+["696","HITAAYU AYURVEDA CLINIC & PANCHAKARMA CENTER","919483960297","Locality Surathkal Mulki Hejamady","hitaayu-ayurveda-clinic-panchakarma-center"],
+["697","Shree Durga Ayurvedic Aushadhalaya","918242478315","Locality Surathkal Mulki Hejamady","shree-durga-ayurvedic-aushadhalaya"],
+["698","D K Ullal Clinic","918242464892","Locality Ullal Bajpe Thokkottu","d-k-ullal-clinic"],
+["699","Nirmala Health center","918242465692","Locality Ullal Bajpe Thokkottu","nirmala-health-center"],
+["700","Ullal Multispeciality Dental Clinic","917204317005","Locality Ullal Bajpe Thokkottu","ullal-multispeciality-dental-clinic"],
+["701","Ullal Diagnostic Center & Medicals","918242464996","Locality Ullal Bajpe Thokkottu","ullal-diagnostic-center-medicals"],
+["702","SHWETHA CLINIC","919449104636","Locality Ullal Bajpe Thokkottu","shwetha-clinic"],
+["703","Mediscope Clinic","919483787982","Locality Ullal Bajpe Thokkottu","mediscope-clinic"],
+["704","Asra Clinic","919845052257","Locality Ullal Bajpe Thokkottu","asra-clinic"],
+["705","Alva's Dental Speciality Clinic","918242252800","Locality Ullal Bajpe Thokkottu","alvas-dental-speciality-clinic"],
+["706","Suraksha Clinic","918197245919","Locality Ullal Bajpe Thokkottu","suraksha-clinic"],
+["707","Sanjeevini Dental Clinic","919964070216","Locality Ullal Bajpe Thokkottu","sanjeevini-dental-clinic"],
+["708","Bajpe Medicals","919538722877","Locality Ullal Bajpe Thokkottu","bajpe-medicals"],
+["709","Sahara Hospital","919663361071","Locality Ullal Bajpe Thokkottu","sahara-hospital"],
+["710","pooja clinic","919448217031","Locality Ullal Bajpe Thokkottu","pooja-clinic"],
+["711","Medglobe Polyclinic & Diagnostic Centre","919148721004","Locality Ullal Bajpe Thokkottu","medglobe-polyclinic-diagnostic-centre"],
+["712","Thokkottu clinical laboratory","919449331869","Locality Ullal Bajpe Thokkottu","thokkottu-clinical-laboratory"],
+["713","Dr. Pandith Mohammed Compound","919845701542","Locality Ullal Bajpe Thokkottu","dr-pandith-mohammed-compound"],
+["714","Dr Supriya g shetty pooja clinic pandithhouse","919448493031","Locality Ullal Bajpe Thokkottu","dr-supriya-g-shetty-pooja-clinicpandithhouse"],
+["715","HERMES HEALTH CARE / CLINIC / DAY CARE CENTRE","916360855615","Locality Ullal Bajpe Thokkottu","hermes-health-care-clinic-day-care-centre"],
+["716","PHYSIOTHERAPY AND REHABILITATION HOME SERVICE","919242889632","Locality Ullal Bajpe Thokkottu","physiotherapy-and-rehabilitation-home-service-dr-a"],
+["717","PUSHKAL DENTAL CLINIC","919845486882","Locality Ullal Bajpe Thokkottu","pushkal-dental-clinic"],
+["718","Pragathi Dental Care Center","919945922227","Locality Ullal Bajpe Thokkottu","pragathi-dental-care-center"],
+["719","Pragathi Dental Care Dental Clinic","918884490009","Locality Ullal Bajpe Thokkottu","pragathi-dental-care-dental-clinic"],
+["720","Harish Dental Care","919900405782","Locality Ullal Bajpe Thokkottu","harish-dental-care"],
+["721","Sunshine Dental Clinic","918073380806","Locality Ullal Bajpe Thokkottu","sunshine-dental-clinic"],
+["722","dr. teeth Dental & Implant Clinic","919481842243","Locality Ullal Bajpe Thokkottu","dr-teeth-dental-implant-clinic"],
+["723","Dental Planet Dental Clinic","919008187845","Locality Ullal Bajpe Thokkottu","dental-planet-dental-clinic"],
+["724","Dentocare","916361374627","Locality Ullal Bajpe Thokkottu","dentocare"],
+["725","MAKS Pharma and Clinic - 24hrs Pharmacy - Ullal","919187400543","Locality Ullal Bajpe Thokkottu","maks-pharma-and-clinic-24hrs-pharmacy-ullal"],
+["726","Devi Polyclinic","918073728145","Locality Ullal Bajpe Thokkottu","devi-polyclinic"],
+["727","SHARADHA HEALTH CENTER","918317490990","Locality Ullal Bajpe Thokkottu","sharadha-health-center"],
+["728","Sattva Diagnostics","918310512337","Locality Ullal Bajpe Thokkottu","sattva-diagnostics"],
+["729","Smart care medical","919141106334","Locality Ullal Bajpe Thokkottu","smart-care-medical"],
+["730","Sri Mahadeshwara Medicals","919731211215","Locality Ullal Bajpe Thokkottu","sri-mahadeshwara-medicals"],
+["731","New Town Medicals","918951237395","Locality Ullal Bajpe Thokkottu","new-town-medicals"],
+["732","Life care medicals 31 Ullal Branch","919901110849","Locality Ullal Bajpe Thokkottu","life-care-medicals-31-ullal-branch"],
+["733","S.K. Medicals","919901741332","Locality Ullal Bajpe Thokkottu","sk-medicals"],
+["734","Medicure Pharma","919591338984","Locality Ullal Bajpe Thokkottu","medicure-pharma"],
+["735","D H care Medical","919945949195","Locality Ullal Bajpe Thokkottu","d-h-care-medical"],
+["736","Shree Maruti Pharma","919590095951","Locality Ullal Bajpe Thokkottu","shree-maruti-pharma"],
+["737","Raghu Medicals","919902181874","Locality Ullal Bajpe Thokkottu","raghu-medicals"],
+["738","RAM MEDICAL ULAL MAIN ROAD","916377270697","Locality Ullal Bajpe Thokkottu","ram-medical-ulal-main-road"],
+["739","NEW MASTER MEDICAL","918792249331","Locality Ullal Bajpe Thokkottu","new-master-medical"],
+["740","Health care medical","919036869610","Locality Ullal Bajpe Thokkottu","health-care-medical"],
+["741","FAAZ CARE PHARMA","918277040556","Locality Ullal Bajpe Thokkottu","faaz-care-pharma"],
+["742","Deepak Clinic","919886334276","Locality Ullal Bajpe Thokkottu","deepak-clinic"],
+["743","Apollo 24|7 Doctor Tele-Consult Near Me Ullal","918062207719","Locality Ullal Bajpe Thokkottu","apollo-247-doctor-tele-consult-near-me-ullal-banga"],
+["744","SVK speciality clinic","919448241702","Locality Ullal Bajpe Thokkottu","svk-speciality-clinic"],
+["745","Sri Sharada Gastro and Liver Clinic","918310405572","Locality Ullal Bajpe Thokkottu","sri-sharada-gastro-and-liver-clinic-dr-gajendra-r-"],
+["746","Star Clinic","919535140866","Locality Ullal Bajpe Thokkottu","star-clinic"],
+["747","Better Skin Dermatology - Nagle Avenue","912125678184","Locality Ullal Bajpe Thokkottu","better-skin-dermatology-nagle-avenue"],
+["748","Vision Care Opticals & Eye Clinic Thokottu","918686212105","Locality Ullal Bajpe Thokkottu","vision-care-opticals-eye-clinic-thokottu"],
+["749","Shri Mokambika Women's Clinic Child care and Nethralaya","919980816643","Locality Ullal Bajpe Thokkottu","shri-mokambika-womens-clinic-child-care-and-nethra"],
+["750","Sunshine Children's Clinic","919535164672","Locality Ullal Bajpe Thokkottu","sunshine-childrens-clinic"],
+["751","S G CHILD CARE PARIHAAR CLINIC","918431410793","Locality Ullal Bajpe Thokkottu","s-g-child-care-parihaar-clinic"],
+["752","Chaitanya Physiotherapy Clinic","919980222180","Locality Ullal Bajpe Thokkottu","chaitanya-physiotherapy-clinic"],
+["753","KRIPA PHYSIOTHERAPY CENTER","917090003002","Locality Ullal Bajpe Thokkottu","kripa-physiotherapy-center"],
+["754","ananya ayurveda","919886867272","Locality Ullal Bajpe Thokkottu","ananya-ayurveda"],
+["755","Dr Hariprasad B-Hareethaki Ayurveda Clinic","919110421398","Locality Ullal Bajpe Thokkottu","dr-hariprasad-b-hareethaki-ayurveda-clinic"],
+["756","Advaitaa Ayurveda","919620119585","Locality Ullal Bajpe Thokkottu","advaitaa-ayurveda"],
+["757","Saukhya Ayurveda Clinic","918792111387","Locality Ullal Bajpe Thokkottu","saukhya-ayurveda-clinic"],
+["758","Ayurswastha Ayurveda Clinic","917892845561","Locality Ullal Bajpe Thokkottu","ayurswastha-ayurveda-clinic"],
+["759","Sadhana Ayuryoga - Ayurveda & Panchakarma Center","919008608505","Locality Ullal Bajpe Thokkottu","sadhana-ayuryoga-ayurveda-panchakarma-center"],
+["760","Janata Medicals","919900408651","Locality Kavoor Kudroli Bikarnakatte","janata-medicals"],
+["761","Nagaraj Medical and Clinic","917338053565","Locality Kavoor Kudroli Bikarnakatte","nagaraj-medical-and-clinic"],
+["762","KAVOOR AYURVEDA CENTRE","917204606703","Locality Kavoor Kudroli Bikarnakatte","kavoor-ayurveda-centre"],
+["763","Kavoor Eye Center And Opticals","918971093805","Locality Kavoor Kudroli Bikarnakatte","kavoor-eye-center-and-opticals"],
+["764","JANATHA CLINIC","918431342406","Locality Kavoor Kudroli Bikarnakatte","janatha-clinic"],
+["765","Chethans dental clinic","919448373763","Locality Kavoor Kudroli Bikarnakatte","chethans-dental-clinic"],
+["766","CURE&CARE CLINICS PONJIMOGARU","919655083053","Locality Kavoor Kudroli Bikarnakatte","curecare-clinicssushidhama-building-kjk-road-ponji"],
+["767","Vishwaas Clinic Dr ArunShetty Vidhyanagar","919886356496","Locality Kavoor Kudroli Bikarnakatte","vishwaas-clinic-dr-arunshettys-vidhyanagar"],
+["768","Chandra Clinic","918088893944","Locality Kavoor Kudroli Bikarnakatte","chandra-clinic"],
+["769","Abdul Basith Clinic","919632521214","Locality Kavoor Kudroli Bikarnakatte","abdul-basith-clinic"],
+["770","Smitha dental clinic","919148727441","Locality Kavoor Kudroli Bikarnakatte","smitha-dental-clinic"],
+["771","Shruti Clinic","919845323641","Locality Kavoor Kudroli Bikarnakatte","shruti-clinic"],
+["772","Ivoryshine dental clinic","917899129897","Locality Kavoor Kudroli Bikarnakatte","ivoryshine-dental-clinic"],
+["773","Dr Shafeeq's Dental Care","919886092462","Locality Pandeshwar Ballalbagh Mallikatta","dr-shafeeqs-dental-care"],
+["774","Dr. Sandeep Shetty","918244264878","Locality Pandeshwar Ballalbagh Mallikatta","dr-sandeep-shetty"],
+["775","Kshema Homeopathy clinic","918139920178","Locality Pandeshwar Ballalbagh Mallikatta","kshema-homeopathy-clinic"],
+["776","Dr Upasana Reddy's speciality dental clinic","919845827259","Locality Pandeshwar Ballalbagh Mallikatta","dr-upasana-reddys-speciality-dental-clinic"],
+["777","Senses 3","918242410834","Locality Pandeshwar Ballalbagh Mallikatta","senses-3"],
+["778","Dr Mufeeda's DENTAL SOLUTIONS","917012648196","Locality Pandeshwar Ballalbagh Mallikatta","dr-mufeedas-dental-solutions"],
+["779","Dr Haris MM","919740978019","Locality Pandeshwar Ballalbagh Mallikatta","dr-haris-mm"],
+["780","Dr Savita Dandekeri","919880836779","Locality Pandeshwar Ballalbagh Mallikatta","dr-savita-dandekeri"],
+["781","Alvas clinic kodialguthu Mangalore","919731260815","Locality Pandeshwar Ballalbagh Mallikatta","alvas-clinic-kodialguthu-6th-cross-mangalore"],
+["782","Atharva Speciality Clinic Dr Archana Bhat","919731914457","Locality Pandeshwar Ballalbagh Mallikatta","atharva-speciality-clinic-dr-archana-bhat"],
+["783","Kongoor Dental Clinic","918242231222","Locality Pandeshwar Ballalbagh Mallikatta","kongoor-dental-clinic"],
+["784","Prafful Medicals","919008596498","Locality Pandeshwar Ballalbagh Mallikatta","prafful-medicals"],
+["785","Dr. Shreya's Multi-Speciality Dental Clinic","918590316615","Locality Pandeshwar Ballalbagh Mallikatta","dr-shreyas-multi-speciality-dental-clinic"],
+["786","Little Paws Veterinary Clinic - Dr. Yashaswi Naravi","919844548311","Locality Pandeshwar Ballalbagh Mallikatta","little-paws-veterinary-clinic-dr-yashaswi-naravi"],
+["787","Hande Vidya Dr S","918242435603","Locality Pandeshwar Ballalbagh Mallikatta","hande-vidya-dr-s"],
+["788","Sri Lakshmi Dental Clinic Dr Kundabala","918904185157","Locality Pandeshwar Ballalbagh Mallikatta","sri-lakshmi-dental-clinic-dr-kundabala"],
+["789","ANAGGHA Dental Speciality Clinic","917019208752","Locality Pandeshwar Ballalbagh Mallikatta","anaggha-dental-speciality-clinic"],
+["790","Online GAMCA Medical centre","917619594366","Locality Pandeshwar Ballalbagh Mallikatta","online-gamca-medical-centre"],
+["791","SRI GOKARNANATHA MEDICALS","917204834060","Locality Pandeshwar Ballalbagh Mallikatta","sri-gokarnanatha-medicals"],
+["792","Shri Durga Besant Medicals","919972671725","Locality Pandeshwar Ballalbagh Mallikatta","shri-durga-besant-medicals"],
+["793","Ravi Medicals - IN THE SERVICE TO HUMANITY","912456632","Locality Pandeshwar Ballalbagh Mallikatta","ravi-medicals-in-the-service-to-humanity-where-you"],
+["794","Dr Srilakshmi M Prabhu MBBS MD DNB MRCP(UK)","919048490926","Locality Pandeshwar Ballalbagh Mallikatta","dr-srilakshmi-m-prabhu-mbbsmddnbmrcpuk"],
+["795","Sri Srinivas Ayurveda Centre","919448846418","Locality Pandeshwar Ballalbagh Mallikatta","sri-srinivas-ayurveda-centre"],
+["796","Sri Sathya Sai Nursing Home","918242493849","Nursing Maternity Homes","sri-sathya-sai-nursing-home"],
+["797","St Joseph Ambulance Mangalore","919743704440","Nursing Maternity Homes","st-joseph-ambulance-mangalore"],
+["798","Karunamaya Trust","918242418946","Nursing Maternity Homes","karunamaya-trust"],
+["799","Vanasuma Veterinary Clinic","918073446934","Veterinary Pet Care","vanasuma-veterinary-clinic"],
+["800","Eela The Vet","918105801588","Veterinary Pet Care","eela-the-vet"],
+["801","Government Veterinary Polyclinic","919141010419","Veterinary Pet Care","government-veterinary-polyclinic"],
+["802","Premchaaya city veterinary unit","919243306957","Veterinary Pet Care","premchaaya-city-veterinary-unit"],
+["803","Dr P Manohar Upadhya","919343345603","Veterinary Pet Care","dr-p-manohar-upadhya"],
+["804","Woof and Fur Pet Spa & Veterinary Clinic","917996605555","Veterinary Pet Care","woof-and-fur-pet-spa-veterinary-clinic"],
+["805","Bubbles Pet Spa Mangalore Pet Grooming Pet Store Pet Clinic","919008942141","Veterinary Pet Care","bubbles-pet-spa-mangalore-pet-grooming-pet-store-p"],
+["806","PET CHOICE","918095778425","Veterinary Pet Care","pet-choice"],
+["807","Aj pets mangalore","918431706479","Veterinary Pet Care","aj-pets-mangalore"],
+["808","Veterinary Clinic Surathkal Dr Suresh Shetty","919845084604","Veterinary Pet Care","veterinary-clinic-surathkal-dr-suresh-shetty"],
+["809","Mangalore Pet Shack","917892705467","Veterinary Pet Care","mangalore-pet-shack"],
+["810","Dream Dog Kennels","917760046251","Veterinary Pet Care","dream-dog-kennels"],
+["811","PET Hut Surathkal","918244254525","Veterinary Pet Care","pet-hut-surathkal"],
+["812","VROOM GROOM PET SPA AND PAWFECT PET STORE","918867892065","Veterinary Pet Care","vroom-groom-pet-spa-and-pawfect-pet-store"],
+["813","Pet Cottage","919945178477","Veterinary Pet Care","pet-cottage"],
+["814","Happy paws","919074918343","Veterinary Pet Care","happy-paws"],
+["815","PET HUB","917760844827","Veterinary Pet Care","pet-hub"],
+["816","Pet Hub Mangalore","917624935774","Veterinary Pet Care","pet-hub-mangalore"],
+["817","PETS FANTASY MANGALORE","919902448903","Veterinary Pet Care","pets-fantasy-mangalore"],
+["818","Happy pawz pets spa","919900761413","Veterinary Pet Care","happy-pawz-pets-spa"],
+["819","PET HUT Golden Nugget Building Mallikatte","919686749525","Veterinary Pet Care","pet-hut-golden-nugget-building-mallikatte"],
+["820","Sai Fish Fantasy","918904646927","Veterinary Pet Care","sai-fish-fantasy"],
+["821","Petzone","919741474746","Veterinary Pet Care","petzone"],
+["822","Aquarium & Pet Shop","918660205900","Veterinary Pet Care","aquarium-pet-shop"],
+["823","PETS HOUSE","918147991840","Veterinary Pet Care","pets-house"],
+["824","PET MAGIC","919513020333","Veterinary Pet Care","pet-magic"],
+["825","Pets Paradise","919980054901","Veterinary Pet Care","pets-paradise"],
+["826","Samanvaya Veterinary Hospital","917019079154","Veterinary Pet Care","samanvaya-veterinary-hospital"],
+["827","Bharath Agrovet Industries Dressed Chicken Division","919483521599","Veterinary Pet Care","bharath-agrovet-industries-dressed-chicken-divisio"],
+["828","Veterinary clinic Dr B Niranjan Hegde","918242452392","Veterinary Pet Care","veterinary-clinic-dr-b-niranjan-hegde"],
+["829","PRASAD PET HOUSE","919663379033","Veterinary Pet Care","prasad-pet-house"],
+["830","DOG HOUSE 70","919741105214","Veterinary Pet Care","dog-house-70"],
+["831","FurryBalls Shihtzu Kennel","919901966519","Veterinary Pet Care","furryballs-shihtzu-kennel"],
+["832","Pets n Ponds","918244255850","Veterinary Pet Care","pets-n-ponds"],
+["833","Pashu Vydakiya Seva And Kritaka Garbadharana Kendra","918147639045","Veterinary Pet Care","pashu-vydakiya-seva-and-kritaka-garbadharana-kendr"],
+["834","XPR VET PHARMA AND PETHUT","919480198769","Veterinary Pet Care","xpr-vet-pharma-and-pethut"],
+["835","HealthCare Pharma","919482216161","Veterinary Pet Care","healthcare-pharma"],
+["836","Pet Fuel","918867372625","Veterinary Pet Care","pet-fuel"],
+["837","Mangalore German shepherds","919964242844","Veterinary Pet Care","mangalore-german-shepherds"],
+["838","Lionel's PET CARE","919731314667","Veterinary Pet Care","lionels-pet-care"],
+["839","Emazo Kennels","917892978642","Veterinary Pet Care","emazo-kennels"],
+["840","Lia Aquarium","917760492777","Veterinary Pet Care","lia-aquarium"],
+["841","Coastal Aquarium","918123240422","Veterinary Pet Care","coastal-aquarium"],
+["842","Aqua Decor","919686989912","Veterinary Pet Care","aqua-decor"],
+["843","Happy fish mangalore","917019961205","Veterinary Pet Care","happy-fish-mangalore"],
+["844","Aqua Fish","919448215407","Veterinary Pet Care","aqua-fish"],
+["845","BETTA HUB","918217619771","Veterinary Pet Care","betta-hub"],
+["846","Fins N Tails","919845636947","Veterinary Pet Care","fins-n-tails"],
+["847","Aqua Gold","919008941176","Veterinary Pet Care","aqua-gold"],
+["848","Blue Waters","919980433285","Veterinary Pet Care","blue-waters"],
+["849","Gajanana Aquarium","919591962532","Veterinary Pet Care","gajanana-aquarium"],
+["850","Fish palace","919880846820","Veterinary Pet Care","fish-palace"],
+["851","Best Aquarium","919448214680","Veterinary Pet Care","best-aquarium"],
+["852","Aqua Beauty","919844096347","Veterinary Pet Care","aqua-beauty"],
+["853","Aqua Land","919986653460","Veterinary Pet Care","aqua-land"],
+["854","GOOD HEALTH HOMECARE SERVICES","919035324777","Home Healthcare Services","good-health-homecare-services"],
+["855","AGNES HOME CARE NURSING","919591250810","Home Healthcare Services","agnes-home-care-nursing"],
+["856","NITHYA PARISHRAMA HOME NURSING SERVICES","917353842285","Home Healthcare Services","nithya-parishrama-home-nursing-services"],
+["857","Dr Maumita's MediTrust Clinic and Diagnostics","919402133875","Home Healthcare Services","dr-maumitas-meditrust-clinic-and-diagnostics"],
+["858","MANGALORE SURGICALS","919845594030","Home Healthcare Services","mangalore-surgicals"],
+["859","CANARA GASES & EQUIPMENTS","919845402710","Home Healthcare Services","canara-gases-equipments"],
+["860","Watt Motors and Energy Charging Station","919844885419","Home Healthcare Services","watt-motors-and-energy-charging-station"],
+["861","ORIENTAL HEALTH EQUIPMENTS","918921698540","Home Healthcare Services","oriental-health-equipments"],
+["862","Sri Ganesh ambulance service","919845230359","Home Healthcare Services","sri-ganesh-ambulance-service"],
+["863","Jacobs Arrangers & St Joseph Ambulance Services","919845018942","Home Healthcare Services","jacobs-arrangers-st-joseph-ambulance-services"],
+["864","KGN Ambulance Mangalore","918861523509","Home Healthcare Services","kgn-ambulance-mangalore"],
+["865","St Sebastian arrangers And ambulance Service","917204697532","Home Healthcare Services","st-sebastian-arrangers-and-ambulance-service"],
+["866","Apis Kidney Stone Institute","918050888342","Home Healthcare Services","apis-kidney-stone-institute"],
+["867","Janaseva Health Care and Home Nurse","917899203960","Home Healthcare Services","janaseva-health-care-and-home-nurse"],
+["868","All is Well","919900254557","Medical Equipment Pharmacy","all-is-well"],
+["869","Neela Surgicals","919036967055","Medical Equipment Pharmacy","neela-surgicals"],
+["870","Adarsh Surgicals","918244285419","Medical Equipment Pharmacy","adarsh-surgicals"],
+["871","Spectra Surgicals","918242441892","Medical Equipment Pharmacy","spectra-surgicals"],
+["872","ACE Surgical Company","918242444174","Medical Equipment Pharmacy","ace-surgical-company"],
+["873","Hebbar Surgicals Inc","918242429082","Medical Equipment Pharmacy","hebbar-surgicals-inc"],
+["874","Shreyas Medicals","918242412374","Medical Equipment Pharmacy","shreyas-medicals"],
+["875","New S.M. Medicals","919880006714","Medical Equipment Pharmacy","new-sm-medicals"],
+["876","Galaxy Medical Store","919845559126","Medical Equipment Pharmacy","galaxy-medical-store"],
+["877","Royal Ortho Surgicals","919844560924","Medical Equipment Pharmacy","royal-ortho-surgicals"],
+["878","Abhaya Artificial Limbs Centre","918722418699","Medical Equipment Pharmacy","abhaya-artificial-limbs-centre"],
+["879","JK Orthotics and Prosthetic Centre","919449954036","Medical Equipment Pharmacy","jk-orthotics-and-prosthetic-centre"]
+];
+
+// ══════ LEADS: all SL 1-879 hardcoded + custom leads via Firebase ══════
+var LEADS_LOADED = true;
+var LEADS_LOADING = false;
+var LEADS_CALLBACKS = [];
+
+function ensureLeadsLoaded(cb){
+  cb(); // leads are fully hardcoded, call back immediately
+}
+
+// ══════ AUTH ══════
+var currentUser = null;
+var loginMode = 'admin';
+var isMobile = window.innerWidth < 768;
+
+function switchLoginTab(mode){
+  loginMode = mode;
+  document.querySelectorAll('.login-tab').forEach(function(t,i){
+    t.classList.toggle('active',(mode==='admin'&&i===0)||(mode==='caller'&&i===1));
+  });
+  document.getElementById('callerSelectWrap').style.display = mode==='caller' ? 'block' : 'none';
+  document.getElementById('loginUser').value = '';
+  document.getElementById('loginPass').value = '';
+  document.getElementById('loginErr').textContent = '';
+  if(mode==='caller'){
+    var sel = document.getElementById('callerSelect');
+    sel.innerHTML = '';
+    getAccounts().callers.forEach(function(c){
+      var o = document.createElement('option'); o.value = c.id; o.textContent = c.name; sel.appendChild(o);
+    });
+    if(sel.options.length) document.getElementById('loginUser').value = sel.options[0].value;
+  }
+}
+document.getElementById('callerSelect').addEventListener('change', function(){
+  document.getElementById('loginUser').value = this.value;
+});
+// init caller select
+(function(){
+  var sel = document.getElementById('callerSelect');
+  getAccounts().callers.forEach(function(c){
+    var o = document.createElement('option'); o.value = c.id; o.textContent = c.name; sel.appendChild(o);
+  });
+})();
+
+function doLogin(){
+  var user = document.getElementById('loginUser').value.trim();
+  var pass = document.getElementById('loginPass').value.trim();
+  var err = document.getElementById('loginErr');
+  err.textContent = '';
+  var accs = getAccounts();
+  if(loginMode === 'admin'){
+    if(user === accs.admin.id && pass === accs.admin.pass){ currentUser = Object.assign({},accs.admin); startApp(); }
+    else err.textContent = '✗ Invalid admin credentials';
+  } else {
+    var caller = accs.callers.find(function(c){ return c.id===user && c.pass===pass; });
+    if(caller){ currentUser = Object.assign({},caller); startApp(); }
+    else err.textContent = '✗ Invalid credentials';
+  }
+}
+document.addEventListener('keypress', function(e){
+  if(e.key==='Enter' && document.getElementById('loginScreen').style.display!=='none') doLogin();
+});
+
+function logout(){
+  document.getElementById('logoutModal').classList.add('open');
+}
+
+function doLogout(){
+  document.getElementById('logoutModal').classList.remove('open');
+  currentUser = null;
+  var deskApp = document.getElementById('app');
+  deskApp.classList.remove('visible');
+  deskApp.style.display = 'none';
+  var mobApp = document.getElementById('appMobile');
+  mobApp.classList.remove('visible');
+  mobApp.style.display = 'none';
+  var ls = document.getElementById('loginScreen');
+  ls.style.display = 'flex';
+  document.getElementById('loginUser').value = '';
+  document.getElementById('loginPass').value = '';
+  document.getElementById('loginErr').textContent = '';
+  loginMode = 'admin';
+  document.querySelectorAll('.login-tab').forEach(function(t,i){ t.classList.toggle('active', i===0); });
+  document.getElementById('callerSelectWrap').style.display = 'none';
+}
+
+function startApp(){
+  isMobile = window.innerWidth < 768;
+  document.getElementById('loginScreen').style.display = 'none';
+  // Init Firebase for real-time sync
+  initFirebase();
+  // Start loading leads in background right away
+  ensureLeadsLoaded(function(){
+    var p = isMobile?'pg-m-':'pg-d-';
+    populateNiches(p);
+    var statsEl=document.getElementById(p+'assignstats');
+    if(statsEl) renderAssign(p);
+  });
+  var accs = getAccounts();
+  var callerData = currentUser.role !== 'admin' ? accs.callers.find(function(c){ return c.name===currentUser.name; }) : null;
+  var init = currentUser.name.slice(0,2).toUpperCase();
+
+  if(isMobile){
+    // Mobile: bottom nav app
+    var av = document.getElementById('headerAvatar');
+    av.textContent = init;
+    if(callerData){ av.style.background = callerData.bg; av.style.color = callerData.tc; }
+    document.getElementById('headerName').textContent = currentUser.name;
+    var mob = document.getElementById('appMobile');
+    mob.style.display = 'flex'; mob.classList.add('visible');
+    var mc = document.getElementById('mobMainContent');
+    var nav = document.getElementById('bottomNav');
+    mc.innerHTML = ''; nav.innerHTML = '';
+    if(currentUser.role==='admin'){ buildAdminNavMob(nav); buildAdminPagesMob(mc); showPageMob('pg-m-overview'); refreshMob('pg-m-overview'); }
+    else { buildCallerNavMob(nav); buildCallerPagesMob(mc); showPageMob('pg-m-tasks'); refreshMob('pg-m-tasks'); }
+  } else {
+    // Desktop: sidebar app
+    document.getElementById('sidebarName').textContent = currentUser.name;
+    document.getElementById('sidebarRole').textContent = currentUser.role==='admin' ? '🔐 Administrator' : '📞 Caller';
+    var deskApp = document.getElementById('app');
+    deskApp.style.display = 'block'; deskApp.classList.add('visible');
+    var nav2 = document.getElementById('navItems');
+    var mc2 = document.getElementById('mainContent');
+    nav2.innerHTML = ''; mc2.innerHTML = '';
+    if(currentUser.role==='admin'){ buildAdminNavDesk(nav2); buildAdminPagesDesk(mc2); showPageDesk('pg-d-overview'); refreshDesk('pg-d-overview'); }
+    else { buildCallerNavDesk(nav2); buildCallerPagesDesk(mc2); showPageDesk('pg-d-tasks'); refreshDesk('pg-d-tasks'); }
+  }
+}
+
+// ══════ DESKTOP NAV ══════
+function showPageDesk(id){
+  document.querySelectorAll('.page-desk').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('#navItems .nav-item').forEach(function(n){ n.classList.remove('active'); });
+  var pg = document.getElementById(id); if(pg) pg.classList.add('active');
+  var n = document.querySelector('#navItems [data-page="'+id+'"]'); if(n) n.classList.add('active');
+}
+function buildAdminNavDesk(nav){
+  var IC={
+    home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1v-9.5z"/><path d="M9 21v-9h6v9"/></svg>',
+    assign:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M9 7h6M9 11h6M9 15h3"/></svg>',
+    callers:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3"/><path d="M2 21v-1a6 6 0 016-6h.5"/><circle cx="17" cy="9" r="3"/><path d="M22 21v-1a5 5 0 00-5-5h-.5"/></svg>',
+    reports:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 17v-5M12 17V9M16 17v-3"/></svg>',
+    payments:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20M6 15h3"/></svg>',
+    deals:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>',
+    settings:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>',
+    tasks:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>',
+    myreports:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
+    mypayments:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>',
+    mydeals:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>'
+  };
+  var items=[
+    {id:'pg-d-overview',icon:IC.home,label:'Overview'},
+    {id:'pg-d-assign',icon:IC.assign,label:'Assign Tasks'},
+    {id:'pg-d-callers',icon:IC.callers,label:'Callers'},
+    {id:'pg-d-reports',icon:IC.reports,label:'Reports'},
+    {id:'pg-d-payments',icon:IC.payments,label:'Payments'},
+    {id:'pg-d-deals',icon:IC.deals,label:'Deals'},
+    {id:'pg-d-settings',icon:IC.settings,label:'Settings'}
+  ];
+  items.forEach(function(it){ nav.insertAdjacentHTML('beforeend','<div class="nav-item" data-page="'+it.id+'" onclick="showPageDesk(\''+it.id+'\');refreshDesk(\''+it.id+'\')"><span class="nav-icon">'+it.icon+'</span><span>'+it.label+'</span></div>'); });
+}
+function buildCallerNavDesk(nav){
+  var IC={
+    tasks:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>',
+    myreports:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
+    mypayments:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>',
+    mydeals:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>'
+  };
+  var items=[
+    {id:'pg-d-tasks',icon:IC.tasks,label:'My Tasks'},
+    {id:'pg-d-creports',icon:IC.myreports,label:'My Reports'},
+    {id:'pg-d-cpayments',icon:IC.mypayments,label:'Payments'},
+    {id:'pg-d-cdeals',icon:IC.mydeals,label:'My Deals'}
+  ];
+  items.forEach(function(it){ nav.insertAdjacentHTML('beforeend','<div class="nav-item" data-page="'+it.id+'" onclick="showPageDesk(\''+it.id+'\');refreshDesk(\''+it.id+'\')"><span class="nav-icon">'+it.icon+'</span><span>'+it.label+'</span></div>'); });
+}
+
+// ══════ MOBILE NAV ══════
+function showPageMob(id){
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('#bottomNav .bnav-item').forEach(function(n){ n.classList.remove('active'); });
+  var pg = document.getElementById(id); if(pg) pg.classList.add('active');
+  document.getElementById('mobMainContent').scrollTop = 0;
+  var n = document.querySelector('#bottomNav [data-page="'+id+'"]'); if(n) n.classList.add('active');
+}
+function buildAdminNavMob(nav){
+  var IC={
+    home:'<svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1v-9.5z"/><path d="M9 21v-9h6v9"/></svg>',
+    assign:'<svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M9 7h6M9 11h6M9 15h3"/></svg>',
+    callers:'<svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3"/><path d="M2 21v-1a6 6 0 016-6h.5"/><circle cx="17" cy="9" r="3"/><path d="M22 21v-1a5 5 0 00-5-5h-.5"/></svg>',
+    reports:'<svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 17v-5M12 17V9M16 17v-3"/></svg>',
+    payments:'<svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20M6 15h3"/></svg>',
+    deals:'<svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>',
+    settings:'<svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>'
+  };
+  var items=[
+    {id:'pg-m-overview',icon:IC.home,label:'Home'},
+    {id:'pg-m-assign',icon:IC.assign,label:'Assign'},
+    {id:'pg-m-callers',icon:IC.callers,label:'Callers'},
+    {id:'pg-m-reports',icon:IC.reports,label:'Reports'},
+    {id:'pg-m-payments',icon:IC.payments,label:'Pay'},
+    {id:'pg-m-deals',icon:IC.deals,label:'Deals'},
+    {id:'pg-m-settings',icon:IC.settings,label:'Settings'}
+  ];
+  items.forEach(function(it){ nav.insertAdjacentHTML('beforeend','<div class="bnav-item" data-page="'+it.id+'" onclick="showPageMob(\''+it.id+'\');refreshMob(\''+it.id+'\')"><div class="bnav-icon-wrap">'+it.icon+'</div><span class="bnav-label">'+it.label+'</span></div>'); });
+}
+function buildCallerNavMob(nav){
+  var IC={
+    tasks:'<svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>',
+    myreports:'<svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
+    mypayments:'<svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>',
+    mydeals:'<svg class="bnav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>'
+  };
+  var items=[
+    {id:'pg-m-tasks',icon:IC.tasks,label:'Tasks'},
+    {id:'pg-m-creports',icon:IC.myreports,label:'Reports'},
+    {id:'pg-m-cpayments',icon:IC.mypayments,label:'Payments'},
+    {id:'pg-m-cdeals',icon:IC.mydeals,label:'Deals'}
+  ];
+  items.forEach(function(it){ nav.insertAdjacentHTML('beforeend','<div class="bnav-item" data-page="'+it.id+'" onclick="showPageMob(\''+it.id+'\');refreshMob(\''+it.id+'\')"><div class="bnav-icon-wrap">'+it.icon+'</div><span class="bnav-label">'+it.label+'</span></div>'); });
+}
+
+// ══════ BUILD PAGES (shared HTML builders) ══════
+function adminPagesHTML(prefix){
+  var isM = prefix==='pg-m-';
+  var pageClass = isM ? 'page' : 'page-desk';
+  return (
+    '<div class="'+pageClass+'" id="'+prefix+'overview">'
+    +'<div class="page-header"><div><div class="page-title">Dashboard</div><div class="page-sub">Live performance</div></div><span class="date-badge" id="'+prefix+'datebadge"></span></div>'
+    +'<div class="stats-grid" id="'+prefix+'stats"></div>'
+    +'<div class="caller-grid" id="'+prefix+'callercards"></div>'
+    +'</div>'
+
+    +'<div class="'+pageClass+'" id="'+prefix+'assign">'
+    +'<div class="page-header"><div><div class="page-title">Assign Tasks</div><div class="page-sub">Distribute leads for today</div></div><span class="date-badge">'+fmtDate(TODAY)+'</span></div>'
+    +'<div class="ctrl-row"><select id="'+prefix+'nicheS" style="flex:1;min-width:0;max-width:200px"></select><input type="number" id="'+prefix+'cCount" value="30" min="1" max="200" style="width:64px" inputmode="numeric"><button class="btn btn-accent" onclick="doAssign(\''+prefix+'\')">Assign ↗</button></div>'
+    +'<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap"><button class="btn btn-secondary btn-sm" onclick="doCopyAll()">Copy All</button><button class="btn btn-danger btn-sm" onclick="doResetAll()" title="Wipe history and restart from lead #1 (879 fresh)">↺ Reset</button><button class="btn btn-secondary btn-sm" onclick="doNextBatch()" title="Assign next fresh batch after daily tasks done" style="border-color:var(--accent);color:var(--accent)">⏭ Next Batch</button><button class="btn btn-accent btn-sm" onclick="openAddLeadModal()" title="Add a lead manually after all 879 are done">➕ Add Lead</button></div>'
+    +'<div class="stats-grid" id="'+prefix+'assignstats"></div>'
+    +'<div class="caller-grid" id="'+prefix+'assigngrid"></div>'
+    +'</div>'
+
+    +'<div class="'+pageClass+'" id="'+prefix+'callers">'
+    +'<div class="page-header"><div><div class="page-title">Caller Management</div><div class="page-sub">Performance & payment</div></div></div>'
+    +'<div id="'+prefix+'callerperfgrid" class="caller-grid"></div>'
+    +'</div>'
+
+    +'<div class="'+pageClass+'" id="'+prefix+'reports">'
+    +'<div class="page-header"><div><div class="page-title">Reports</div><div class="page-sub">Task completion logs</div></div></div>'
+    +'<div class="filter-row" id="'+prefix+'reportfilters"></div>'
+    +'<div class="panel"><div class="panel-header"><div class="panel-title">Today\'s Call Activity</div></div><div class="tbl-wrap" id="'+prefix+'reporttable"></div></div>'
+    +'</div>'
+
+    +'<div class="'+pageClass+'" id="'+prefix+'payments">'
+    +'<div class="page-header"><div><div class="page-title">Payments</div><div class="page-sub">All payment records</div></div><button class="btn btn-accent btn-sm" onclick="openPayModal()">+ Add</button></div>'
+    +'<div class="stats-grid" id="'+prefix+'paystats"></div>'
+    +'<div class="panel"><div class="panel-header"><div class="panel-title">All Transactions</div></div><div class="tbl-wrap" id="'+prefix+'paytable"></div></div>'
+    +'</div>'
+
+    +'<div class="'+pageClass+'" id="'+prefix+'deals">'
+    +'<div class="page-header"><div><div class="page-title">Deals</div><div class="page-sub">All logged deals</div></div><button class="btn btn-accent btn-sm" onclick="openDealModal()">+ Log</button></div>'
+    +'<div class="stats-grid" id="'+prefix+'dealstats"></div>'
+    +'<div class="panel"><div class="panel-header"><div class="panel-title">All Deals</div></div><div class="tbl-wrap" id="'+prefix+'dealtable"></div></div>'
+    +'</div>'
+
+    +'<div class="'+pageClass+'" id="'+prefix+'settings">'
+    +'<div class="page-header"><div><div class="page-title">Settings</div><div class="page-sub">Manage accounts</div></div></div>'
+    +'<div id="'+prefix+'settingscontent"></div>'
+    +'</div>'
+  );
+}
+
+function callerPagesHTML(prefix){
+  var isM = prefix==='pg-m-';
+  var pageClass = isM ? 'page' : 'page-desk';
+  return (
+    '<div class="'+pageClass+'" id="'+prefix+'tasks">'
+    +'<div class="page-header"><div><div class="page-title">Today\'s Tasks</div><div class="page-sub" id="'+prefix+'tasksub">Loading...</div></div>'
+    +'<div style="display:flex;gap:6px;align-items:center"><span class="date-badge">'+fmtDate(TODAY)+'</span><button class="btn btn-secondary btn-sm" onclick="copyMyList(\''+prefix+'\')">Copy</button></div></div>'
+    +'<div class="stats-grid" id="'+prefix+'taskstats"></div>'
+    +'<div class="panel"><div class="panel-header"><div class="panel-title">Call List</div><div style="font-size:11px;color:var(--text3)">Tap checkbox to mark done</div></div><div id="'+prefix+'tasklist"></div></div>'
+    +'</div>'
+
+    +'<div class="'+pageClass+'" id="'+prefix+'creports">'
+    +'<div class="page-header"><div><div class="page-title">My Performance</div><div class="page-sub">Daily activity summary</div></div></div>'
+    +'<div id="'+prefix+'reportcontent"></div>'
+    +'</div>'
+
+    +'<div class="'+pageClass+'" id="'+prefix+'cpayments">'
+    +'<div class="page-header"><div><div class="page-title">My Payments</div><div class="page-sub">Payment history from Nex Studio</div></div></div>'
+    +'<div class="stats-grid" id="'+prefix+'paystats2"></div>'
+    +'<div class="panel"><div class="panel-header"><div class="panel-title">Transaction History</div></div><div class="tbl-wrap" id="'+prefix+'paytable2"></div></div>'
+    +'</div>'
+
+    +'<div class="'+pageClass+'" id="'+prefix+'cdeals">'
+    +'<div class="page-header"><div><div class="page-title">My Deals</div><div class="page-sub">Deals you have logged</div></div>'
+    +'<button class="btn btn-accent btn-sm" onclick="openDealModal(currentUser.name)">+ Log Deal</button></div>'
+    +'<div class="stats-grid" id="'+prefix+'cdealstats"></div>'
+    +'<div class="panel"><div class="panel-header"><div class="panel-title">My Deal History</div></div><div class="tbl-wrap" id="'+prefix+'cdealtable"></div></div>'
+    +'</div>'
+  );
+}
+
+function buildAdminPagesDesk(mc){ mc.innerHTML = adminPagesHTML('pg-d-'); initAdminPages('pg-d-'); }
+function buildAdminPagesMob(mc){ mc.innerHTML = adminPagesHTML('pg-m-'); initAdminPages('pg-m-'); }
+function buildCallerPagesDesk(mc){ mc.innerHTML = callerPagesHTML('pg-d-'); }
+function buildCallerPagesMob(mc){ mc.innerHTML = callerPagesHTML('pg-m-'); }
+
+function initAdminPages(p){
+  var el = document.getElementById(p+'datebadge'); if(el) el.textContent = fmtDate(TODAY);
+  populateNiches(p);
+}
+
+// ══════ REFRESH DISPATCHERS ══════
+function refreshDesk(id){
+  var p = 'pg-d-';
+  if(currentUser.role==='admin'){
+    if(id===p+'overview') renderAdminOverview(p);
+    if(id===p+'assign') renderAssign(p);
+    if(id===p+'callers') renderCallerPerf(p);
+    if(id===p+'reports') renderReports(p);
+    if(id===p+'payments') renderPayments(p);
+    if(id===p+'deals') renderDeals(p);
+    if(id===p+'settings') renderSettings(p);
+  } else {
+    if(id===p+'tasks') renderMyTasks(p);
+    if(id===p+'creports') renderMyReports(p);
+    if(id===p+'cpayments') renderMyPayments(p);
+    if(id===p+'cdeals') renderMyDeals(p);
+  }
+}
+function refreshMob(id){
+  var p = 'pg-m-';
+  if(currentUser.role==='admin'){
+    if(id===p+'overview') renderAdminOverview(p);
+    if(id===p+'assign') renderAssign(p);
+    if(id===p+'callers') renderCallerPerf(p);
+    if(id===p+'reports') renderReports(p);
+    if(id===p+'payments') renderPayments(p);
+    if(id===p+'deals') renderDeals(p);
+    if(id===p+'settings') renderSettings(p);
+  } else {
+    if(id===p+'tasks') renderMyTasks(p);
+    if(id===p+'creports') renderMyReports(p);
+    if(id===p+'cpayments') renderMyPayments(p);
+    if(id===p+'cdeals') renderMyDeals(p);
+  }
+}
+
+// ══════ ADMIN RENDER FUNCTIONS ══════
+function renderAdminOverview(p){
+  var accs=getAccounts(),prog=getProgress(),assigns=getAssignments(),payments=getPayments(),deals=getDeals();
+  var totalAssigned=0,totalDone=0;
+  accs.callers.forEach(function(c){ var tasks=assigns[c.name]||[]; totalAssigned+=tasks.length; var pr=prog[c.name]||{}; totalDone+=Object.values(pr).filter(Boolean).length; });
+  var todayPay=payments.filter(function(py){ return py.date===TODAY; }).reduce(function(s,py){ return s+Number(py.amt); },0);
+  var todayDeals=deals.filter(function(d){ return d.date===TODAY; }).length;
+  var totalDealVal=deals.reduce(function(s,d){ return s+Number(d.value||0); },0);
+  var statsEl=document.getElementById(p+'stats');
+  if(statsEl) statsEl.innerHTML='<div class="stat-card blue"><div class="stat-label">Total Leads</div><div class="stat-value blue">'+getAllLeads().length+'</div><div class="stat-sub">In database</div></div><div class="stat-card green"><div class="stat-label">Calls Done</div><div class="stat-value green">'+totalDone+'/'+totalAssigned+'</div><div class="stat-sub">'+(totalAssigned>0?Math.round(totalDone/totalAssigned*100):0)+'%</div></div><div class="stat-card yellow"><div class="stat-label">Deals Today</div><div class="stat-value yellow">'+todayDeals+'</div><div class="stat-sub">₹'+totalDealVal.toLocaleString('en-IN')+'</div></div><div class="stat-card purple"><div class="stat-label">Paid Today</div><div class="stat-value purple" style="font-size:18px">₹'+todayPay.toLocaleString('en-IN')+'</div></div>';
+  var grid=document.getElementById(p+'callercards'); if(!grid) return; grid.innerHTML='';
+  accs.callers.forEach(function(c){
+    var tasks=assigns[c.name]||[],pr=prog[c.name]||{},done=Object.values(pr).filter(Boolean).length,pct=tasks.length>0?Math.round(done/tasks.length*100):0;
+    var cDeals=deals.filter(function(d){ return d.caller===c.name; }).length;
+    var cPay=payments.filter(function(py){ return py.caller===c.name; }).reduce(function(s,py){ return s+Number(py.amt); },0);
+    var init=c.name.slice(0,2).toUpperCase();
+    grid.insertAdjacentHTML('beforeend','<div class="caller-card"><div class="caller-card-header"><div class="avatar" style="background:'+c.bg+';color:'+c.tc+'">'+init+'</div><div style="flex:1"><div class="caller-name">'+c.name+'</div><div class="caller-role">'+tasks.length+' tasks · '+done+' done · '+cDeals+' deals</div></div><span class="badge '+(pct>=80?'badge-green':pct>=50?'badge-yellow':'badge-red')+'">'+pct+'%</span></div><div class="mini-stats"><div class="mini-stat"><div class="mini-stat-val" style="color:'+c.tc+'">'+done+'/'+tasks.length+'</div><div class="mini-stat-lbl">Progress</div></div><div class="mini-stat"><div class="mini-stat-val" style="color:var(--warn)">'+cDeals+'</div><div class="mini-stat-lbl">Deals</div></div><div class="mini-stat"><div class="mini-stat-val" style="color:var(--success);font-size:14px">₹'+cPay.toLocaleString('en-IN')+'</div><div class="mini-stat-lbl">Received</div></div></div><div class="prog-bar"><div class="prog-fill" style="width:'+pct+'%;background:'+c.tc+'"></div></div></div>');
+  });
+}
+
+function populateNiches(p){
+  var niches=["All"].concat(Array.from(new Set(getAllLeads().map(function(l){ return l[3]; }))));
+  var sel=document.getElementById(p+'nicheS'); if(!sel) return; sel.innerHTML='';
+  niches.forEach(function(n){ var o=document.createElement('option'); o.value=n; o.textContent=n; sel.appendChild(o); });
+}
+
+function doAssign(p){
+  ensureLeadsLoaded(function(){
+    var callers=getAccounts().callers;
+    var perCaller=parseInt(document.getElementById(p+'cCount').value)||30;
+    var nicheEl=document.getElementById(p+'nicheS');
+    var niche=nicheEl?nicheEl.value:'All';
+    var assigned=new Set(Object.values(getAssignments()).flat().map(function(l){ return l[0]; }));
+    var pool=getAllLeads().filter(function(l){ return(niche==='All'||l[3]===niche)&&!assigned.has(l[0]); });
+    var batch=pool.slice(0,perCaller*callers.length);
+    var assigns=getAssignments();
+    callers.forEach(function(c,i){ assigns[c.name]=batch.slice(i*perCaller,(i+1)*perCaller); });
+    saveAssignments(assigns);
+    populateNiches(p);
+    renderAssign(p);
+    showAlert('Tasks assigned! '+batch.length+' leads distributed ('+perCaller+' per caller).','success');
+  });
+}
+
+// ── Reset All: wipe history entirely → all 879 become fresh, assign from lead #1 ──
+function doResetAll(){
+  showConfirm(
+    '↺',
+    'Reset to Start',
+    'This will wipe ALL assignment history and restart from lead #1. All 879 leads will be fresh again. Current tasks and progress will be cleared.',
+    'Reset Everything',
+    'btn-danger',
+    function(){
+      ensureLeadsLoaded(function(){
+        var p = isMobile?'pg-m-':'pg-d-';
+        var callers = getAccounts().callers;
+        var perCaller = parseInt((document.getElementById(p+'cCount')||{value:'30'}).value)||30;
+        var nicheEl = document.getElementById(p+'nicheS');
+        var niche = nicheEl ? nicheEl.value : 'All';
+
+        // Wipe entire history
+        DB.set('ever_assigned', []);
+        syncToFB('ever_assigned', []);
+
+        // Clear today progress
+        DB.set('progress_'+TODAY, {});
+        syncToFB('progress_'+TODAY, {});
+
+        // Assign very first batch from the beginning
+        var pool = getAllLeads().filter(function(l){ return niche==='All'||l[3]===niche; });
+        var batchPool = pool.slice(0, perCaller * callers.length);
+        var newAssigns = {};
+        callers.forEach(function(c,i){ newAssigns[c.name] = batchPool.slice(i*perCaller,(i+1)*perCaller); });
+        DB.set('assignments_'+TODAY, newAssigns);
+        syncToFB('assignments_'+TODAY, newAssigns);
+
+        // Mark only this first batch as ever assigned
+        var newEver = batchPool.map(function(l){ return l[0]; });
+        DB.set('ever_assigned', newEver);
+        syncToFB('ever_assigned', newEver);
+
+        renderAssign(p);
+        showAlert('Full reset done! Back to lead #1 — '+batchPool.length+' fresh leads assigned. 879 total fresh.','success');
+      });
+    }
+  );
+}
+
+// ── Next Batch: assign next fresh leads continuing from where history left off ──
+function doNextBatch(){
+  showConfirm(
+    '⏭',
+    'Next Batch',
+    "Assign the next fresh batch of leads — picks up where you left off, no repeats. Today's progress will be cleared for the new batch.",
+    'Assign Next Batch',
+    'btn-accent',
+    function(){
+      ensureLeadsLoaded(function(){
+        var p = isMobile?'pg-m-':'pg-d-';
+        var callers = getAccounts().callers;
+        var perCaller = parseInt((document.getElementById(p+'cCount')||{value:'30'}).value)||30;
+        var perRound = perCaller * callers.length;
+
+        // Build ever-assigned set: history + current session
+        var everAssigned = DB.get('ever_assigned') || [];
+        var everSet = new Set(everAssigned);
+        Object.values(getAssignments()).flat().forEach(function(l){ everSet.add(l[0]); });
+
+        var nicheEl = document.getElementById(p+'nicheS');
+        var niche = nicheEl ? nicheEl.value : 'All';
+        var pool = getAllLeads().filter(function(l){ return niche==='All'||l[3]===niche; });
+
+        // Only leads never assigned before
+        var freshPool = pool.filter(function(l){ return !everSet.has(l[0]); });
+
+        var recycled = false;
+        if(freshPool.length < perRound){
+          everSet = new Set();
+          freshPool = pool.slice();
+          recycled = true;
+        }
+
+        var batchPool = freshPool.slice(0, perRound);
+
+        // Save updated ever_assigned
+        batchPool.forEach(function(l){ everSet.add(l[0]); });
+        var newEver = Array.from(everSet);
+        DB.set('ever_assigned', newEver);
+        syncToFB('ever_assigned', newEver);
+
+        // Save new assignments + clear progress
+        var newAssigns = {};
+        callers.forEach(function(c,i){ newAssigns[c.name] = batchPool.slice(i*perCaller,(i+1)*perCaller); });
+        DB.set('assignments_'+TODAY, newAssigns);
+        syncToFB('assignments_'+TODAY, newAssigns);
+        DB.set('progress_'+TODAY, {});
+        syncToFB('progress_'+TODAY, {});
+
+        renderAssign(p);
+
+        if(recycled){
+          showAlert('All leads exhausted — history wiped, restarting from the beginning!','info');
+        } else {
+          var batchNum = Math.ceil(newEver.length / Math.max(perRound,1));
+          showAlert('Next Batch #'+batchNum+' assigned — '+batchPool.length+' fresh leads, no repeats.','success');
+        }
+      });
+    }
+  );
+}
+
+function doCopyAll(){
+  var assigns=getAssignments(),callers=getAccounts().callers;
+  var txt='NEX STUDIO — DAILY TASKS ('+fmtDate(TODAY)+')\n'+'='.repeat(40)+'\n\n';
+  callers.forEach(function(c){ var tasks=assigns[c.name]||[]; txt+=c.name.toUpperCase()+' — '+tasks.length+' CALLS\n'+'-'.repeat(30)+'\n'; if(!tasks.length) txt+='No tasks assigned.\n'; else tasks.forEach(function(l,i){ txt+=(i+1)+'. '+l[1]+'\n   +'+l[2]+' | Demo: '+LEADS_BASE_URL+l[4]+'\n'; }); txt+='\n'; });
+  copyText(txt,'All tasks copied!');
+}
+
+function renderAssign(p){
+  var assigns=getAssignments(),callers=getAccounts().callers;
+  var perCaller=parseInt((document.getElementById(p+'cCount')||{value:'30'}).value)||30;
+  var assigned=Object.values(assigns).flat().length;
+  var assignedIds=new Set(Object.values(assigns).flat().map(function(x){ return x[0]; }));
+  var everAssigned=new Set(DB.get('ever_assigned')||[]);
+  var rem=getAllLeads().filter(function(l){ return !everAssigned.has(l[0]); }).length;
+  var statsEl=document.getElementById(p+'assignstats');
+  if(statsEl) statsEl.innerHTML='<div class="stat-card blue"><div class="stat-label">Total Leads</div><div class="stat-value blue">'+getAllLeads().length+'</div></div><div class="stat-card green"><div class="stat-label">Assigned Today</div><div class="stat-value green">'+assigned+'</div></div><div class="stat-card yellow"><div class="stat-label">Fresh Remaining</div><div class="stat-value yellow">'+rem+'</div></div><div class="stat-card purple"><div class="stat-label">Per Caller</div><div class="stat-value purple">'+perCaller+'</div></div>';
+  var grid=document.getElementById(p+'assigngrid'); if(!grid) return; grid.innerHTML='';
+  callers.forEach(function(c){
+    var tasks=assigns[c.name]||[],prog=getProgress()[c.name]||{},done=Object.values(prog).filter(Boolean).length,init=c.name.slice(0,2).toUpperCase();
+    var tHTML=tasks.length===0?'<div class="empty"><div class="empty-icon">📭</div>No tasks assigned yet</div>':tasks.map(function(l,i){ return'<div class="task-item"><span class="task-num">'+(i+1)+'.</span><span class="task-name" title="'+l[1]+'">'+l[1]+'</span>'+(prog[l[0]]?'<span class="badge badge-green" style="font-size:9px">✓</span>':'')+(l[4]?'<a class="task-demo" href="'+LEADS_BASE_URL+l[4]+'/" target="_blank">Demo</a>':'')+'</div>'; }).join('');
+    grid.insertAdjacentHTML('beforeend','<div class="caller-card"><div class="caller-card-header"><div class="avatar" style="background:'+c.bg+';color:'+c.tc+'">'+init+'</div><div style="flex:1"><div class="caller-name">'+c.name+'</div><div class="caller-role">'+tasks.length+' assigned · '+done+' done</div></div><button class="btn btn-secondary btn-sm" onclick="copyCallerList(\''+c.name+'\')">Copy</button></div><div class="prog-bar" style="margin-bottom:10px"><div class="prog-fill" style="width:'+(tasks.length>0?Math.round(done/tasks.length*100):0)+'%;background:'+c.tc+'"></div></div><div class="task-list">'+tHTML+'</div></div>');
+  });
+}
+
+function copyCallerList(name){
+  var tasks=getAssignments()[name]||[];
+  if(!tasks.length){ showAlert('No tasks assigned to '+name,'error'); return; }
+  var txt='NEX STUDIO — '+name.toUpperCase()+' TASKS ('+fmtDate(TODAY)+')\n\n'+tasks.map(function(l,i){ return(i+1)+'. '+l[1]+'\n   Phone: +'+l[2]+'\n   Demo: '+LEADS_BASE_URL+l[4]; }).join('\n\n');
+  copyText(txt,"Copied "+name+"'s list!");
+}
+
+function renderCallerPerf(p){
+  var accs=getAccounts(),assigns=getAssignments(),prog=getProgress(),payments=getPayments(),deals=getDeals();
+  var grid=document.getElementById(p+'callerperfgrid'); if(!grid) return; grid.innerHTML='';
+  accs.callers.forEach(function(c){
+    var tasks=assigns[c.name]||[],pr=prog[c.name]||{},done=Object.values(pr).filter(Boolean).length,pct=tasks.length>0?Math.round(done/tasks.length*100):0;
+    var cDeals=deals.filter(function(d){ return d.caller===c.name; });
+    var cPay=payments.filter(function(py){ return py.caller===c.name; });
+    var totalPaid=cPay.reduce(function(s,py){ return s+Number(py.amt); },0);
+    var init=c.name.slice(0,2).toUpperCase();
+    var recentPay=cPay.slice(-3).reverse().map(function(py){ return'<tr><td class="td-mono">'+py.date+'</td><td class="td-name">'+py.type+'</td><td style="color:var(--success)">₹'+Number(py.amt).toLocaleString('en-IN')+'</td><td>'+(py.note||'—')+'</td></tr>'; }).join('');
+    grid.insertAdjacentHTML('beforeend','<div class="caller-card" style="border-top:3px solid '+c.tc+'"><div class="caller-card-header"><div class="avatar" style="background:'+c.bg+';color:'+c.tc+'">'+init+'</div><div style="flex:1"><div class="caller-name">'+c.name+'</div><div class="caller-role">ID: '+c.id+'</div></div><div style="display:flex;gap:6px"><button class="btn btn-green btn-sm" onclick="openPayModal(\''+c.name+'\')">+ Pay</button><button class="btn btn-accent btn-sm" onclick="openDealModal(\''+c.name+'\')">+ Deal</button></div></div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:10px 0"><div style="background:var(--bg3);border-radius:8px;padding:10px 12px"><div style="font-size:9px;color:var(--text3);text-transform:uppercase;margin-bottom:3px">Tasks Done</div><div style="font-size:18px;font-weight:700;color:'+c.tc+'">'+done+'/'+tasks.length+'</div></div><div style="background:var(--bg3);border-radius:8px;padding:10px 12px"><div style="font-size:9px;color:var(--text3);text-transform:uppercase;margin-bottom:3px">Completion</div><div style="font-size:18px;font-weight:700;color:var(--warn)">'+pct+'%</div></div><div style="background:var(--bg3);border-radius:8px;padding:10px 12px"><div style="font-size:9px;color:var(--text3);text-transform:uppercase;margin-bottom:3px">Deals</div><div style="font-size:18px;font-weight:700;color:var(--purple)">'+cDeals.length+'</div></div><div style="background:var(--bg3);border-radius:8px;padding:10px 12px"><div style="font-size:9px;color:var(--text3);text-transform:uppercase;margin-bottom:3px">Total Paid</div><div style="font-size:15px;font-weight:700;color:var(--success)">₹'+totalPaid.toLocaleString('en-IN')+'</div></div></div><div class="prog-bar" style="margin-bottom:10px"><div class="prog-fill" style="width:'+pct+'%;background:'+c.tc+'"></div></div>'+(recentPay?'<div style="font-size:10px;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px">Recent Payments</div><div class="tbl-wrap"><table><thead><tr><th>Date</th><th>Type</th><th>Amt</th><th>Note</th></tr></thead><tbody>'+recentPay+'</tbody></table></div>':'<div style="font-size:12px;color:var(--text3)">No payments yet.</div>')+'</div>');
+  });
+}
+
+function renderReports(p){
+  var accs=getAccounts();
+  var filtersEl=document.getElementById(p+'reportfilters');
+  if(filtersEl){ filtersEl.innerHTML='<span class="filter-chip active" onclick="setRFilter(this,\'All\',\''+p+'\')">All</span>'+accs.callers.map(function(c){ return'<span class="filter-chip" onclick="setRFilter(this,\''+c.name+'\',\''+p+'\')">'+c.name+'</span>'; }).join(''); }
+  renderReportTable('All',p);
+}
+function setRFilter(el,f,p){ el.closest('.filter-row').querySelectorAll('.filter-chip').forEach(function(c){ c.classList.remove('active'); }); el.classList.add('active'); renderReportTable(f,p); }
+function renderReportTable(filter,p){
+  var accs=getAccounts(),assigns=getAssignments(),prog=getProgress(),tbl=document.getElementById(p+'reporttable'); if(!tbl) return;
+  var callers=filter==='All'?accs.callers:accs.callers.filter(function(c){ return c.name===filter; });
+  var rows='';
+  callers.forEach(function(c){ var tasks=assigns[c.name]||[],pr=prog[c.name]||{}; tasks.forEach(function(l){ var isDone=!!pr[l[0]]; rows+='<tr><td class="td-name">'+c.name+'</td><td class="td-mono">'+l[0]+'</td><td>'+l[1]+'</td><td class="td-mono">+'+l[2]+'</td><td><span class="badge badge-blue">'+l[3]+'</span></td><td><span class="badge '+(isDone?'badge-green':'badge-gray')+'">'+(isDone?'✓':'Pending')+'</span></td></tr>'; }); });
+  if(!rows) rows='<tr><td colspan="6"><div class="empty"><div class="empty-icon">📭</div>No tasks assigned today</div></td></tr>';
+  tbl.innerHTML='<table><thead><tr><th>Caller</th><th>#</th><th>Clinic</th><th>Phone</th><th>Niche</th><th>Status</th></tr></thead><tbody>'+rows+'</tbody></table>';
+}
+
+function renderPayments(p){
+  var payments=getPayments(),accs=getAccounts();
+  var total=payments.reduce(function(s,py){ return s+Number(py.amt); },0);
+  var todayPay=payments.filter(function(py){ return py.date===TODAY; }).reduce(function(s,py){ return s+Number(py.amt); },0);
+  var statsEl=document.getElementById(p+'paystats');
+  if(statsEl) statsEl.innerHTML='<div class="stat-card green"><div class="stat-label">Total Paid</div><div class="stat-value green" style="font-size:18px">₹'+total.toLocaleString('en-IN')+'</div></div><div class="stat-card blue"><div class="stat-label">Paid Today</div><div class="stat-value blue" style="font-size:18px">₹'+todayPay.toLocaleString('en-IN')+'</div></div><div class="stat-card yellow"><div class="stat-label">Records</div><div class="stat-value yellow">'+payments.length+'</div></div><div class="stat-card purple"><div class="stat-label">Callers</div><div class="stat-value purple">'+accs.callers.length+'</div></div>';
+  var rows=payments.slice().reverse().map(function(py){ return'<tr><td class="td-mono">'+py.date+'</td><td class="td-name">'+py.caller+'</td><td><span class="badge badge-blue">'+py.type+'</span></td><td style="color:var(--success);font-weight:600">₹'+Number(py.amt).toLocaleString('en-IN')+'</td><td>'+(py.note||'—')+'</td><td><button class="btn btn-danger btn-sm" onclick="deletePayment(\''+py.id+'\')">Del</button></td></tr>'; }).join('')||'<tr><td colspan="6"><div class="empty"><div class="empty-icon">💳</div>No payments yet</div></td></tr>';
+  var tblEl=document.getElementById(p+'paytable'); if(tblEl) tblEl.innerHTML='<table><thead><tr><th>Date</th><th>Caller</th><th>Type</th><th>Amount</th><th>Note</th><th></th></tr></thead><tbody>'+rows+'</tbody></table>';
+}
+
+function renderDeals(p){
+  var deals=getDeals(),total=deals.reduce(function(s,d){ return s+Number(d.value||0); },0);
+  var todayDeals=deals.filter(function(d){ return d.date===TODAY; }).length;
+  var closed=deals.filter(function(d){ return d.status==='Closed'; }).length;
+  var statsEl=document.getElementById(p+'dealstats');
+  if(statsEl) statsEl.innerHTML='<div class="stat-card green"><div class="stat-label">Total Deals</div><div class="stat-value green">'+deals.length+'</div></div><div class="stat-card blue"><div class="stat-label">Today</div><div class="stat-value blue">'+todayDeals+'</div></div><div class="stat-card yellow"><div class="stat-label">Total Value</div><div class="stat-value yellow" style="font-size:16px">₹'+total.toLocaleString('en-IN')+'</div></div><div class="stat-card purple"><div class="stat-label">Closed</div><div class="stat-value purple">'+closed+'</div></div>';
+  var rows=deals.slice().reverse().map(function(d){ return'<tr><td class="td-mono">'+d.date+'</td><td class="td-name">'+d.caller+'</td><td>'+d.client+'</td><td style="color:var(--warn);font-weight:600">₹'+Number(d.value||0).toLocaleString('en-IN')+'</td><td><span class="badge '+(d.status==='Closed'?'badge-green':d.status==='Follow-up'?'badge-yellow':'badge-blue')+'">'+d.status+'</span></td><td>'+(d.notes||'—')+'</td><td><button class="btn btn-danger btn-sm" onclick="deleteDeal(\''+d.id+'\')">Del</button></td></tr>'; }).join('')||'<tr><td colspan="7"><div class="empty"><div class="empty-icon">🤝</div>No deals yet</div></td></tr>';
+  var tblEl=document.getElementById(p+'dealtable'); if(tblEl) tblEl.innerHTML='<table><thead><tr><th>Date</th><th>Caller</th><th>Client</th><th>Value</th><th>Status</th><th>Notes</th><th></th></tr></thead><tbody>'+rows+'</tbody></table>';
+}
+
+function renderSettings(p){
+  var accs=getAccounts(),el=document.getElementById(p+'settingscontent'); if(!el) return;
+  var callerRows=accs.callers.map(function(c,i){ return'<div class="panel" style="margin-bottom:12px"><div style="display:flex;align-items:center;gap:12px;margin-bottom:12px"><div class="avatar" style="background:'+c.bg+';color:'+c.tc+'">'+c.name.slice(0,2).toUpperCase()+'</div><div style="flex:1"><div class="caller-name">'+c.name+'</div></div><button class="btn btn-danger btn-sm" onclick="removeCaller('+i+',\''+p+'\')" title="Remove caller">✕ Remove</button></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div><label style="font-size:11px;color:var(--text3)">Login ID</label><input id="cid_'+p+i+'" value="'+c.id+'" class="settings-input"></div><div><label style="font-size:11px;color:var(--text3)">Password</label><input id="cpw_'+p+i+'" value="'+c.pass+'" type="text" class="settings-input"></div></div><button class="btn btn-accent btn-sm" style="margin-top:10px" onclick="saveCallerCreds('+i+',\''+p+'\')">Save Changes</button></div>'; }).join('');
+  el.innerHTML='<div class="panel"><div class="panel-header"><div class="panel-title">Admin Credentials</div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div><label style="font-size:11px;color:var(--text3)">Admin ID</label><input id="adminId_'+p+'" value="'+accs.admin.id+'" class="settings-input"></div><div><label style="font-size:11px;color:var(--text3)">Admin Password</label><input id="adminPw_'+p+'" value="'+accs.admin.pass+'" type="text" class="settings-input"></div></div><button class="btn btn-accent" style="margin-top:12px;width:100%" onclick="saveAdminCreds(\''+p+'\')">Update Admin Credentials</button></div><div style="display:flex;align-items:center;justify-content:space-between;margin:16px 0 10px"><div style="font-size:15px;font-weight:600">Caller Accounts <span style="font-size:12px;color:var(--text3);font-weight:400">('+accs.callers.length+' callers · 30 calls each)</span></div><button class="btn btn-accent btn-sm" onclick="openAddCallerModal()">➕ Add Caller</button></div>'+callerRows;
+}
+
+function openAddCallerModal(){
+  document.getElementById('newCallerName').value='';
+  document.getElementById('newCallerId').value='';
+  document.getElementById('newCallerPass').value='';
+  document.getElementById('addCallerModal').classList.add('open');
+}
+
+function saveNewCaller(){
+  var name=document.getElementById('newCallerName').value.trim();
+  var id=document.getElementById('newCallerId').value.trim();
+  var pass=document.getElementById('newCallerPass').value.trim();
+  if(!name){ showAlert('Caller name is required','error'); return; }
+  if(!id){ showAlert('Login ID is required','error'); return; }
+  if(!pass){ showAlert('Password is required','error'); return; }
+  var accs=getAccounts();
+  var exists=accs.callers.find(function(c){ return c.id===id; });
+  if(exists){ showAlert('Login ID already taken','error'); return; }
+  var bgs=['#1a3a5c','#0d3328','#3a2800','#3a0d1e','#1a1a40','#002020','#3a1a00','#2a0030'];
+  var tcs=['#4f8ef7','#6ee7b7','#f59e0b','#f472b6','#a78bfa','#22c55e','#fb923c','#e879f9'];
+  var idx=accs.callers.length % bgs.length;
+  accs.callers.push({ id:id, pass:pass, name:name, bg:bgs[idx], tc:tcs[idx], role:'caller' });
+  saveAccounts(accs);
+  closeModal('addCallerModal');
+  var sel=document.getElementById('callerSelect'); sel.innerHTML='';
+  accs.callers.forEach(function(c){ var o=document.createElement('option'); o.value=c.id; o.textContent=c.name; sel.appendChild(o); });
+  var p=isMobile?'pg-m-':'pg-d-';
+  renderSettings(p); renderCallerPerf(p); renderAssign(p);
+  showAlert(name+' added! They will receive 30 leads per round.','success');
+}
+
+function removeCaller(i,p){
+  var accs=getAccounts();
+  var name=accs.callers[i].name;
+  showConfirm(
+    '⚠️',
+    'Remove Caller',
+    'Remove "'+name+'"? Their account will be deleted. Assigned tasks and payment records will remain.',
+    'Remove',
+    'btn-danger',
+    function(){
+      var accs2=getAccounts();
+      accs2.callers.splice(i,1);
+      saveAccounts(accs2);
+      var sel=document.getElementById('callerSelect'); sel.innerHTML='';
+      accs2.callers.forEach(function(c){ var o=document.createElement('option'); o.value=c.id; o.textContent=c.name; sel.appendChild(o); });
+      renderSettings(p); renderCallerPerf(p); renderAssign(p);
+      showAlert(name+' removed','info');
+    }
+  );
+}
+function saveCallerCreds(i,p){ var accs=getAccounts(); accs.callers[i].id=document.getElementById('cid_'+p+i).value.trim(); accs.callers[i].pass=document.getElementById('cpw_'+p+i).value.trim(); saveAccounts(accs); showAlert(accs.callers[i].name+"'s credentials updated",'success'); }
+function saveAdminCreds(p){ var accs=getAccounts(); accs.admin.id=document.getElementById('adminId_'+p).value.trim(); accs.admin.pass=document.getElementById('adminPw_'+p).value.trim(); saveAccounts(accs); showAlert('Admin credentials updated','success'); }
+
+// ══════ PAYMENT / DEAL ══════
+function openPayModal(callerName){
+  var accs=getAccounts();
+  if(!callerName) callerName=accs.callers[0].name;
+  document.getElementById('payCallerTarget').value=callerName;
+  document.getElementById('payCallerName').value=callerName;
+  document.getElementById('payAmt').value='';
+  document.getElementById('payDate').value=TODAY;
+  document.getElementById('payNote').value='';
+  document.getElementById('payModal').classList.add('open');
+}
+function savePayment(){
+  var caller=document.getElementById('payCallerTarget').value;
+  var amt=document.getElementById('payAmt').value;
+  var date=document.getElementById('payDate').value;
+  var type=document.getElementById('payType').value;
+  var note=document.getElementById('payNote').value;
+  if(!amt||isNaN(amt)||Number(amt)<=0){ showAlert('Enter a valid amount','error'); return; }
+  var payments=getPayments();
+  payments.push({id:Date.now().toString(),caller:caller,amt:Number(amt),date:date,type:type,note:note});
+  savePayments(payments); closeModal('payModal');
+  var p=isMobile?'pg-m-':'pg-d-'; renderPayments(p); renderCallerPerf(p);
+  showAlert('Payment of ₹'+Number(amt).toLocaleString('en-IN')+' recorded for '+caller,'success');
+}
+function deletePayment(id){
+  showConfirm('💳','Delete Payment','Are you sure you want to delete this payment record?','Delete','btn-danger',function(){
+    savePayments(getPayments().filter(function(py){ return py.id!==id; }));
+    var p=isMobile?'pg-m-':'pg-d-'; renderPayments(p);
+    showAlert('Payment deleted','info');
+  });
+}
+
+function openDealModal(callerName){
+  var accs=getAccounts(); if(!callerName) callerName=accs.callers[0].name;
+  document.getElementById('dealCallerTarget').value=callerName;
+  document.getElementById('dealCallerName').value=callerName;
+  document.getElementById('dealClient').value='';
+  document.getElementById('dealValue').value='';
+  document.getElementById('dealDate').value=TODAY;
+  document.getElementById('dealNotes').value='';
+  document.getElementById('dealModal').classList.add('open');
+}
+function saveDeal(){
+  var caller=document.getElementById('dealCallerTarget').value;
+  var client=document.getElementById('dealClient').value.trim();
+  var value=document.getElementById('dealValue').value;
+  var date=document.getElementById('dealDate').value;
+  var status=document.getElementById('dealStatus').value;
+  var notes=document.getElementById('dealNotes').value;
+  if(!client){ showAlert('Enter client name','error'); return; }
+  var deals=getDeals();
+  deals.push({id:Date.now().toString(),caller:caller,client:client,value:Number(value)||0,date:date,status:status,notes:notes});
+  saveDeals(deals); closeModal('dealModal');
+  var p=isMobile?'pg-m-':'pg-d-';
+  if(currentUser&&currentUser.role==='admin'){ renderDeals(p); renderAdminOverview(p); }
+  else { renderMyDeals(p); }
+  showAlert('Deal logged for '+client,'success');
+}
+function deleteDeal(id){
+  showConfirm('🤝','Delete Deal','Are you sure you want to delete this deal?','Delete','btn-danger',function(){
+    saveDeals(getDeals().filter(function(d){ return d.id!==id; }));
+    var p=isMobile?'pg-m-':'pg-d-';
+    if(currentUser&&currentUser.role==='admin') renderDeals(p); else renderMyDeals(p);
+  });
+}
+
+// ══════ ADD LEAD MANUALLY ══════
+function openAddLeadModal(){
+  document.getElementById('newLeadName').value='';
+  document.getElementById('newLeadPhone').value='';
+  document.getElementById('newLeadNiche').value='';
+  document.getElementById('newLeadSlug').value='';
+  document.getElementById('addLeadModal').classList.add('open');
+}
+
+function saveNewLead(){
+  var name=document.getElementById('newLeadName').value.trim();
+  var phone=document.getElementById('newLeadPhone').value.trim().replace(/\D/g,'');
+  var niche=document.getElementById('newLeadNiche').value.trim()||'Custom';
+  var slug=document.getElementById('newLeadSlug').value.trim();
+  if(!name){ showAlert('Business name is required','error'); return; }
+  if(!phone){ showAlert('Phone number is required','error'); return; }
+  var customLeads=getCustomLeads();
+  var nextId='C'+(LEADS.length+customLeads.length+1);
+  customLeads.push([nextId,name,phone,niche,slug]);
+  saveCustomLeads(customLeads);
+  closeModal('addLeadModal');
+  showAlert('Lead added: '+name,'success');
+  var p=isMobile?'pg-m-':'pg-d-';
+  populateNiches(p);
+  renderAssign(p);
+}
+
+// ══════ CALLER RENDER ══════
+function renderMyTasks(p){
+  var name=currentUser.name,tasks=getAssignments()[name]||[],pr=getProgress()[name]||{};
+  var done=Object.values(pr).filter(Boolean).length,pct=tasks.length>0?Math.round(done/tasks.length*100):0;
+  var subEl=document.getElementById(p+'tasksub'); if(subEl) subEl.textContent=done+'/'+tasks.length+' calls completed';
+  var statsEl=document.getElementById(p+'taskstats');
+  if(statsEl) statsEl.innerHTML='<div class="stat-card blue"><div class="stat-label">Assigned</div><div class="stat-value blue">'+tasks.length+'</div></div><div class="stat-card green"><div class="stat-label">Completed</div><div class="stat-value green">'+done+'</div></div><div class="stat-card yellow"><div class="stat-label">Remaining</div><div class="stat-value yellow">'+(tasks.length-done)+'</div></div><div class="stat-card purple"><div class="stat-label">Progress</div><div class="stat-value purple">'+pct+'%</div></div>';
+  var list=document.getElementById(p+'tasklist'); if(!list) return;
+  if(!tasks.length){ list.innerHTML='<div class="empty"><div class="empty-icon">📭</div><div>No tasks assigned yet.<br>Check back after admin assigns tasks.</div></div>'; return; }
+  list.innerHTML=tasks.map(function(l){
+    var isDone=!!pr[l[0]];
+    return'<div class="my-task-item"><div class="task-checkbox '+(isDone?'done':'')+'" onclick="toggleTask(\''+l[0]+'\',\''+p+'\')"></div><div class="task-details"><div class="task-clinic" style="'+(isDone?'text-decoration:line-through;opacity:.5':'')+'">'+ escHtml(l[1])+'</div><div class="task-phone">+'+l[2]+' · '+l[3]+'</div></div><div class="task-actions">'+(l[4]?'<a class="btn btn-secondary btn-sm" href="'+LEADS_BASE_URL+l[4]+'/" target="_blank">Demo</a>':'')+'<a class="call-btn" href="tel:+'+l[2]+'">📞</a></div></div>';
+  }).join('');
+}
+
+function toggleTask(leadId,p){
+  var name=currentUser.name,prog=getProgress();
+  if(!prog[name]) prog[name]={};
+  prog[name][leadId]=!prog[name][leadId];
+  saveProgress(prog); renderMyTasks(p);
+}
+
+function copyMyList(p){
+  var name=currentUser.name,tasks=getAssignments()[name]||[];
+  if(!tasks.length){ showAlert('No tasks assigned yet','error'); return; }
+  var txt='NEX STUDIO — '+name.toUpperCase()+' TASKS ('+fmtDate(TODAY)+')\n\n'+tasks.map(function(l,i){ return(i+1)+'. '+l[1]+'\n   Phone: +'+l[2]+'\n   Demo: '+LEADS_BASE_URL+(l[4]||''); }).join('\n\n');
+  copyText(txt,'Task list copied!');
+}
+
+function renderMyReports(p){
+  var name=currentUser.name,assigns=getAssignments()[name]||[],prog=getProgress()[name]||{};
+  var done=Object.values(prog).filter(Boolean).length,pct=assigns.length>0?Math.round(done/assigns.length*100):0;
+  var deals=getDeals().filter(function(d){ return d.caller===name; });
+  var el=document.getElementById(p+'reportcontent'); if(!el) return;
+  var rows=assigns.map(function(l,i){ var isDone=!!prog[l[0]]; return'<tr><td class="td-mono">'+(i+1)+'</td><td class="td-name">'+l[1]+'</td><td class="td-mono">+'+l[2]+'</td><td><span class="badge badge-blue">'+l[3]+'</span></td><td><span class="badge '+(isDone?'badge-green':'badge-gray')+'">'+(isDone?'✓ Done':'Pending')+'</span></td></tr>'; }).join('')||'<tr><td colspan="5"><div class="empty">No tasks today</div></td></tr>';
+  el.innerHTML='<div class="stats-grid" style="margin-bottom:14px"><div class="stat-card green"><div class="stat-label">Progress</div><div class="stat-value green">'+pct+'%</div><div class="stat-sub">'+done+' of '+assigns.length+'</div></div><div class="stat-card blue"><div class="stat-label">Assigned</div><div class="stat-value blue">'+assigns.length+'</div></div><div class="stat-card yellow"><div class="stat-label">My Deals</div><div class="stat-value yellow">'+deals.length+'</div></div><div class="stat-card purple"><div class="stat-label">Deal Value</div><div class="stat-value purple" style="font-size:16px">₹'+deals.reduce(function(s,d){ return s+Number(d.value||0); },0).toLocaleString('en-IN')+'</div></div></div><div class="panel"><div class="panel-header"><div class="panel-title">Today\'s Call Log</div></div><div class="tbl-wrap"><table><thead><tr><th>#</th><th>Clinic</th><th>Phone</th><th>Niche</th><th>Status</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>';
+}
+
+function renderMyPayments(p){
+  var name=currentUser.name,payments=getPayments().filter(function(py){ return py.caller===name; });
+  var total=payments.reduce(function(s,py){ return s+Number(py.amt); },0);
+  var lastPay=payments.length?payments[payments.length-1]:null;
+  var statsEl=document.getElementById(p+'paystats2');
+  if(statsEl) statsEl.innerHTML='<div class="stat-card green"><div class="stat-label">Total Received</div><div class="stat-value green" style="font-size:18px">₹'+total.toLocaleString('en-IN')+'</div></div><div class="stat-card blue"><div class="stat-label">Payments</div><div class="stat-value blue">'+payments.length+'</div></div><div class="stat-card yellow"><div class="stat-label">Last Payment</div><div class="stat-value yellow" style="font-size:16px">'+(lastPay?'₹'+Number(lastPay.amt).toLocaleString('en-IN'):'₹0')+'</div><div class="stat-sub">'+(lastPay?lastPay.date:'—')+'</div></div><div class="stat-card purple"><div class="stat-label">Latest Type</div><div class="stat-value purple" style="font-size:16px">'+(lastPay?lastPay.type:'—')+'</div></div>';
+  var rows=payments.slice().reverse().map(function(py){ return'<tr><td class="td-mono">'+py.date+'</td><td><span class="badge badge-blue">'+py.type+'</span></td><td style="color:var(--success);font-weight:600">₹'+Number(py.amt).toLocaleString('en-IN')+'</td><td>'+(py.note||'—')+'</td></tr>'; }).join('')||'<tr><td colspan="4"><div class="empty"><div class="empty-icon">💰</div>No payments yet</div></td></tr>';
+  var tblEl=document.getElementById(p+'paytable2'); if(tblEl) tblEl.innerHTML='<table><thead><tr><th>Date</th><th>Type</th><th>Amount</th><th>Note</th></tr></thead><tbody>'+rows+'</tbody></table>';
+}
+
+function renderMyDeals(p){
+  var name=currentUser.name,deals=getDeals().filter(function(d){ return d.caller===name; });
+  var total=deals.reduce(function(s,d){ return s+Number(d.value||0); },0),closed=deals.filter(function(d){ return d.status==='Closed'; }).length;
+  var statsEl=document.getElementById(p+'cdealstats');
+  if(statsEl) statsEl.innerHTML='<div class="stat-card green"><div class="stat-label">Total Deals</div><div class="stat-value green">'+deals.length+'</div></div><div class="stat-card yellow"><div class="stat-label">Total Value</div><div class="stat-value yellow" style="font-size:16px">₹'+total.toLocaleString('en-IN')+'</div></div><div class="stat-card blue"><div class="stat-label">Closed</div><div class="stat-value blue">'+closed+'</div></div><div class="stat-card purple"><div class="stat-label">In Progress</div><div class="stat-value purple">'+(deals.length-closed)+'</div></div>';
+  var rows=deals.slice().reverse().map(function(d){ return'<tr><td class="td-mono">'+d.date+'</td><td class="td-name">'+d.client+'</td><td style="color:var(--warn);font-weight:600">₹'+Number(d.value||0).toLocaleString('en-IN')+'</td><td><span class="badge '+(d.status==='Closed'?'badge-green':d.status==='Follow-up'?'badge-yellow':'badge-blue')+'">'+d.status+'</span></td><td>'+(d.notes||'—')+'</td><td><button class="btn btn-danger btn-sm" onclick="deleteMyDeal(\''+d.id+'\',\''+p+'\')">Del</button></td></tr>'; }).join('')||'<tr><td colspan="6"><div class="empty"><div class="empty-icon">🤝</div>No deals logged yet</div></td></tr>';
+  var tblEl=document.getElementById(p+'cdealtable'); if(tblEl) tblEl.innerHTML='<table><thead><tr><th>Date</th><th>Client</th><th>Value</th><th>Status</th><th>Notes</th><th></th></tr></thead><tbody>'+rows+'</tbody></table>';
+}
+
+function deleteMyDeal(id,p){
+  showConfirm('🤝','Delete Deal','Are you sure you want to delete this deal?','Delete','btn-danger',function(){
+    saveDeals(getDeals().filter(function(d){ return d.id!==id; }));
+    renderMyDeals(p);
+  });
+}
+
+// ══════ UTILS ══════
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+
+function showConfirm(icon, title, msg, okLabel, okClass, onOk){
+  document.getElementById('confirmIcon').textContent = icon;
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmMsg').textContent = msg;
+  var okBtn = document.getElementById('confirmOkBtn');
+  var cancelBtn = document.getElementById('confirmCancelBtn');
+  okBtn.textContent = okLabel || 'Confirm';
+  okBtn.className = 'btn ' + (okClass || 'btn-danger') + ' ';
+  okBtn.style.minWidth = '100px';
+  okBtn.style.fontWeight = '700';
+  // Remove old listeners by cloning
+  var newOk = okBtn.cloneNode(true);
+  var newCancel = cancelBtn.cloneNode(true);
+  okBtn.parentNode.replaceChild(newOk, okBtn);
+  cancelBtn.parentNode.replaceChild(newCancel, cancelBtn);
+  newOk.addEventListener('click', function(){
+    document.getElementById('confirmModal').classList.remove('open');
+    onOk();
+  });
+  newCancel.addEventListener('click', function(){
+    document.getElementById('confirmModal').classList.remove('open');
+  });
+  document.getElementById('confirmModal').classList.add('open');
+}
+
+function showAlert(msg, type){
+  type = type||'info';
+  var box = document.getElementById('alertBox');
+  var a = document.createElement('div');
+  a.className = 'alert '+type;
+  a.textContent = msg;
+  box.appendChild(a);
+  setTimeout(function(){ a.style.opacity='0'; a.style.transform='translateX(20px)'; a.style.transition='all .3s'; setTimeout(function(){ a.remove(); },300); }, 2800);
+}
+
+function fmtDate(d){
+  return new Date(d+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+}
+
+function escHtml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function copyText(txt, successMsg){
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(function(){ showAlert(successMsg,'success'); }).catch(function(){ fallbackCopy(txt, successMsg); });
+  } else { fallbackCopy(txt, successMsg); }
+}
+function fallbackCopy(txt, successMsg){
+  var ta = document.createElement('textarea'); ta.value = txt;
+  ta.style.position='fixed'; ta.style.opacity='0';
+  document.body.appendChild(ta); ta.focus(); ta.select();
+  try{ document.execCommand('copy'); showAlert(successMsg,'success'); }catch(e){ showAlert('Copy failed — please copy manually','error'); }
+  document.body.removeChild(ta);
+}
+
+// Responsive re-init on resize
+var resizeTimer;
+window.addEventListener('resize', function(){
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(function(){
+    var nowMobile = window.innerWidth < 768;
+    if(currentUser && nowMobile !== isMobile){
+      isMobile = nowMobile;
+      // rebuild UI for new breakpoint
+      if(isMobile){
+        document.getElementById('app').style.display='none'; document.getElementById('app').classList.remove('visible');
+      } else {
+        document.getElementById('appMobile').style.display=''; document.getElementById('appMobile').classList.remove('visible');
+      }
+      startApp();
+    }
+  }, 300);
+});
+</script>
+</body>
+</html>
