@@ -1,5 +1,5 @@
 // Nex CRM Service Worker
-var CACHE = 'nex-crm-v1';
+var CACHE = 'nex-crm-v2';
 var ASSETS = [
   './',
   './index.html',
