@@ -1320,7 +1320,7 @@ function leadObj(l){return{id:l[0],name:l[1],phone:l[2],niche:l[3],slug:l[4],dem
 function getWA(lead,callerName){
   const nicheMap={'Dental':'Doctor','General Practice':'Doctor','Gynecology':'Ma\'am','Orthopedics':'Doctor','Pediatrics':'Doctor','Lawyer Premium':'Sir','Property Lawyer':'Sir','Chartered Accountant':'Sir','HR Consultant':'Ma\'am'};
   const greeting=nicheMap[lead.niche]||'Sir/Ma\'am';
-  const msg=`Hello ${greeting},%0aThis is ${callerName||'Nishaf'} from Nex Studio. I've prepared a quick demo website for *${lead.name}*.%0a%0a✅ Learn about services  ✅ See photos  ✅ Find location  ✅ Contact quickly%0a%0aDemo: ${lead.demo}%0a%0aThank You! — Nex Studio`;
+  const msg=`Hello ${greeting},%0aThis is ${callerName||'Nishaf'} from Nex Studio.%0a%0aI've prepared a quick demo website concept for your clinic so you can see how it could look online.%0a%0aThe idea is to make it easier for patients to%0a%0a  Learn about treatments%0a  See clinic photos%0a  Find your location easily%0a  Contact the clinic quickly%0a%0aI'll send the demo below so you can have a look!%0aIt's just to give you a clear idea on what we offer.%0a%0aThank You!%0a%0a${lead.demo}`;
   return`https://wa.me/${lead.phone}?text=${msg}`;
 }
 function getStatusClass(s){return{interested:'status-interested','not-interested':'status-not',dnp:'status-dnp',later:'status-later'}[s]||'status-none';}
