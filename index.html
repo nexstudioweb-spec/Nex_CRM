@@ -1592,6 +1592,9 @@ function renderOverview(){
 function renderAssign(){
   const callers=fbData.callers?Object.values(fbData.callers):[];
   const totalBatches=getTotalBatches();
+  const prevCaller=$$('assign-caller')?.value||'';
+  const prevExtraCaller=$$('extra-caller')?.value||'';
+  const prevResetCaller=$$('reset-caller')?.value||'';
   $$('content').innerHTML=`
 <div class="assign-panel">
   <div class="assign-title">Assign Lead Batches to Caller</div>
@@ -1635,6 +1638,9 @@ function renderAssign(){
     <button class="btn btn-blue btn-sm" onclick="copyAllLeads()">📋 Copy All Lead Names</button>
   </div>
 </div>`;
+  if(prevCaller&&$$('assign-caller'))$$('assign-caller').value=prevCaller;
+  if(prevExtraCaller&&$$('extra-caller'))$$('extra-caller').value=prevExtraCaller;
+  if(prevResetCaller&&$$('reset-caller'))$$('reset-caller').value=prevResetCaller;
   syncBatchBtns();
 }
 let selectedBatches=new Set();
