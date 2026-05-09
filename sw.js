@@ -1,5 +1,5 @@
-// Nex CRM Service Worker
-var CACHE = 'nex-crm-v3';
+\// Nex CRM Service Worker
+var CACHE = 'nex-crm-v4';
 var ASSETS = [
   './',
   './index.html',
@@ -32,34 +32,33 @@ self.addEventListener('activate', function(e){
   self.clients.claim();
 });
 
-// Fetch: network-first for Firebase/external, cache-first for local assets
+// Fetch: network first, fall back to cache
 self.addEventListener('fetch', function(e){
-  var url = e.request.url;
+  // Only handle GET requests
+  if(e.request.method !== 'GET') return;
 
-  // Always go network for Firebase, Google Fonts, external APIs
-  if(url.includes('firebaseio.com') ||
-     url.includes('googleapis.com') ||
-     url.includes('gstatic.com') ||
-     url.includes('fonts.googleapis') ){
-    e.respondWith(fetch(e.request).catch(function(){ return caches.match(e.request); }));
+  // For Firebase API calls — always go network, never cache
+  if(e.request.url.includes('firebasedatabase.app')){
     return;
   }
 
-  // Cache-first for local assets
   e.respondWith(
-    caches.match(e.request).then(function(cached){
-      if(cached) return cached;
-      return fetch(e.request).then(function(response){
-        // Cache new local assets
-        if(response && response.status === 200 && e.request.method === 'GET'){
-          var clone = response.clone();
-          caches.open(CACHE).then(function(cache){ cache.put(e.request, clone); });
+    fetch(e.request)
+      .then(function(response){
+        // Cache fresh copy of valid responses
+        if(response && response.status === 200){
+          var copy = response.clone();
+          caches.open(CACHE).then(function(cache){
+            cache.put(e.request, copy);
+          });
         }
         return response;
-      }).catch(function(){
-        // Offline fallback: return index.html
-        return caches.match('./index.html');
-      });
-    })
+      })
+      .catch(function(){
+        // Network failed — serve from cache
+        return caches.match(e.request).then(function(cached){
+          return cached || caches.match('./index.html');
+        });
+      })
   );
 });
