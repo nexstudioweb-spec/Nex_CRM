@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0a0b0f">
 <title>Nex Studio CRM</title>
-<link rel="manifest" href="./manifest.json">
+<link rel="manifest" href="#" id="manifest-link">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800;900&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -35,7 +35,9 @@
   --blue-dim:rgba(59,130,246,.08);
   --radius:12px;
   --radius-sm:8px;
-  --bnav-h:62px;
+  --bnav-h:68px;
+  --transition-fast:.13s;
+  --transition-med:.22s;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 button,a,[onclick]{touch-action:manipulation}
@@ -67,7 +69,7 @@ input,select,textarea{font-family:'Geist','Inter',system-ui,sans-serif;outline:n
 .sidebar-user .user-role{font-size:9.5px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;font-weight:700;margin-top:2px}
 .nav-section{padding:8px 0;flex:1;overflow-y:auto}
 .nav-label{padding:10px 15px 3px;font-size:10.5px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;font-weight:700}
-.nav-item{display:flex;align-items:center;gap:9px;padding:7px 10px;margin:1px 7px;cursor:pointer;border-radius:var(--radius-sm);transition:background .13s,color .13s;color:var(--text2);font-size:12.5px;font-weight:500;line-height:1}
+.nav-item{display:flex;align-items:center;gap:9px;padding:7px 10px;margin:1px 7px;cursor:pointer;border-radius:var(--radius-sm);transition:background .15s ease,color .15s ease,border-color .15s ease;color:var(--text2);font-size:12.5px;font-weight:500;line-height:1}
 .nav-item:hover{background:var(--accent-dim);color:var(--text)}
 .nav-item.active{background:var(--accent-dim);color:var(--text);font-weight:700;border:1px solid var(--accent-glow)}
 .nav-item .nav-icon{width:15px;height:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -102,10 +104,12 @@ input,select,textarea{font-family:'Geist','Inter',system-ui,sans-serif;outline:n
 #bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:rgba(10,11,15,.97);border-top:1px solid var(--border);z-index:200;padding-bottom:env(safe-area-inset-bottom);backdrop-filter:blur(24px);transform:translateZ(0);will-change:transform}
 /* Bottom nav only shown via media query — never via JS inline style */
 .bnav-items{display:flex;height:var(--bnav-h)}
-.bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;color:#6b7494;font-size:9.5px;gap:4px;transition:color .18s;position:relative;font-weight:700;letter-spacing:.25px;font-family:'Geist','Inter',system-ui,sans-serif}
+.bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;color:#6b7494;font-size:9.5px;gap:4px;transition:color .18s ease;position:relative;font-weight:700;letter-spacing:.25px;font-family:'Geist','Inter',system-ui,sans-serif}
 .bnav-item.active{color:var(--text)}
+.bnav-item.active::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:24px;height:2px;background:var(--text);border-radius:0 0 2px 2px}
 .bnav-item.logout{color:#6b7494!important}
 .bnav-item.logout:active,.bnav-item.logout:hover{color:var(--red)!important}
+.bnav-item:active{opacity:.7;transform:scale(.93)}
 .bnav-icon-wrap{position:relative;display:flex;align-items:center;justify-content:center;width:36px;height:26px}
 .bnav-icon{line-height:1;position:relative;z-index:1;display:flex;align-items:center;justify-content:center}
 
@@ -119,8 +123,8 @@ input,select,textarea{font-family:'Geist','Inter',system-ui,sans-serif;outline:n
    STATS GRID
 ═══════════════════════════════════════ */
 .stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:9px;margin-bottom:18px}
-.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:15px 13px;display:flex;flex-direction:column;gap:6px;transition:border-color .18s;cursor:default}
-.stat-card:hover{border-color:var(--border2)}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:15px 13px;display:flex;flex-direction:column;gap:6px;transition:border-color .18s ease,box-shadow .18s ease;cursor:default}
+.stat-card:hover{border-color:var(--border2);box-shadow:0 2px 12px rgba(0,0,0,.2)}
 .stat-val{font-size:24px;font-weight:900;line-height:1;letter-spacing:-.8px;font-variant-numeric:tabular-nums;font-family:'Geist Mono','DM Mono',monospace}
 .stat-lbl{font-size:10.5px;color:var(--text2);font-weight:700;letter-spacing:.5px;text-transform:uppercase}
 .stat-accent{color:var(--text)}
@@ -139,8 +143,9 @@ input,select,textarea{font-family:'Geist','Inter',system-ui,sans-serif;outline:n
 /* ═══════════════════════════════════════
    BUTTONS
 ═══════════════════════════════════════ */
-.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 15px;border-radius:var(--radius-sm);font-size:12.5px;font-weight:700;cursor:pointer;transition:background .13s,color .13s,border-color .13s,opacity .13s;border:none;letter-spacing:.05px;font-family:'Geist','Inter',system-ui,sans-serif;line-height:1}
-.btn:active{transform:scale(.97)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 15px;border-radius:var(--radius-sm);font-size:12.5px;font-weight:700;cursor:pointer;transition:background .15s ease,color .15s ease,border-color .15s ease,transform .1s ease,opacity .15s ease;border:none;letter-spacing:.05px;font-family:'Geist','Inter',system-ui,sans-serif;line-height:1}
+.btn:active{transform:scale(.96)}
+.btn:hover{opacity:.92}
 .btn svg{flex-shrink:0}
 .btn-primary{background:var(--accent);color:var(--accent-text)}
 .btn-primary:hover{background:rgba(255,255,255,.88)}
@@ -161,8 +166,8 @@ input,select,textarea{font-family:'Geist','Inter',system-ui,sans-serif;outline:n
    INPUTS
 ═══════════════════════════════════════ */
 .input-wrap{position:relative}
-.input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px;color:var(--text);font-size:13px;transition:border-color .15s;font-family:'Geist','Inter',system-ui,sans-serif;font-weight:400}
-.input:focus{border-color:var(--border2);outline:none}
+.input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px;color:var(--text);font-size:13px;transition:border-color .18s ease,box-shadow .18s ease;font-family:'Geist','Inter',system-ui,sans-serif;font-weight:400}
+.input:focus{border-color:var(--border2);outline:none;box-shadow:0 0 0 3px rgba(255,255,255,.04)}
 .input::placeholder{color:var(--text3);font-weight:400}
 .select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%232a2f42' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:30px}
 .form-row{display:grid;gap:10px;margin-bottom:10px}
@@ -188,7 +193,7 @@ input,select,textarea{font-family:'Geist','Inter',system-ui,sans-serif;outline:n
 ═══════════════════════════════════════ */
 .filter-chips{display:flex;gap:6px;flex-wrap:nowrap;margin-bottom:12px;overflow-x:auto;padding-bottom:2px}
 .filter-chips::-webkit-scrollbar{display:none}
-.chip{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:var(--text2);transition:background .13s,color .13s,border-color .13s;white-space:nowrap;font-family:'Geist','Inter',system-ui,sans-serif;letter-spacing:.15px}
+.chip{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:var(--text2);transition:background .15s ease,color .15s ease,border-color .15s ease,transform .1s ease;white-space:nowrap;font-family:'Geist','Inter',system-ui,sans-serif;letter-spacing:.15px}
 .chip:active{transform:scale(.96)}
 .chip.active{border-color:var(--border2);background:var(--accent-dim);color:var(--text)}
 .chip.chip-green.active{border-color:rgba(34,197,94,.3);background:var(--green-dim);color:var(--green)}
@@ -200,7 +205,7 @@ input,select,textarea{font-family:'Geist','Inter',system-ui,sans-serif;outline:n
    LEAD CARDS
 ═══════════════════════════════════════ */
 .leads-list{display:flex;flex-direction:column;gap:8px}
-.lead-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:13px 15px;transition:border-color .15s}
+.lead-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:13px 15px;transition:border-color .18s ease,box-shadow .18s ease}
 .lead-card:active{border-color:var(--border2)}
 .lead-top{display:flex;align-items:flex-start;gap:11px;margin-bottom:10px}
 .lead-num{font-size:10px;color:var(--text3);min-width:28px;font-weight:500;padding-top:2px;letter-spacing:.1px;font-family:'Geist Mono','DM Mono',monospace}
@@ -216,7 +221,7 @@ input,select,textarea{font-family:'Geist','Inter',system-ui,sans-serif;outline:n
 .status-none{background:var(--bg3);color:var(--text3)}
 .lead-actions{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
 .lead-status-btns{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
-.status-btn{padding:7px 6px;border-radius:7px;font-size:11.5px;font-weight:700;cursor:pointer;border:1px solid var(--border);transition:background .12s,color .12s,border-color .12s;text-align:center;font-family:'Geist','Inter',system-ui,sans-serif;letter-spacing:.1px;background:var(--bg3);color:var(--text2)}
+.status-btn{padding:7px 6px;border-radius:7px;font-size:11.5px;font-weight:700;cursor:pointer;border:1px solid var(--border);transition:background .15s ease,color .15s ease,border-color .15s ease,transform .1s ease;text-align:center;font-family:'Geist','Inter',system-ui,sans-serif;letter-spacing:.1px;background:var(--bg3);color:var(--text2)}
 .status-btn:active{transform:scale(.96)}
 .status-btn.s-int:hover,.status-btn.s-int.sel{background:var(--green-dim);border-color:rgba(34,197,94,.3);color:var(--green)}
 .status-btn.s-not:hover,.status-btn.s-not.sel{background:var(--red-dim);border-color:rgba(239,68,68,.3);color:var(--red)}
@@ -230,15 +235,15 @@ input,select,textarea{font-family:'Geist','Inter',system-ui,sans-serif;outline:n
 .table-wrap{overflow-x:auto;border-radius:var(--radius-sm);border:1px solid var(--border)}
 table{width:100%;border-collapse:collapse;min-width:600px}
 th{background:var(--bg3);padding:10px 13px;text-align:left;font-size:10.5px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border)}
-td{padding:10px 13px;border-bottom:1px solid var(--border);font-size:12.5px;vertical-align:middle;font-weight:400}
+td{padding:10px 13px;border-bottom:1px solid var(--border);font-size:12.5px;vertical-align:middle;font-weight:400;transition:background .15s ease}
 tr:last-child td{border-bottom:none}
-tr:hover td{background:rgba(255,255,255,.015)}
+tr:hover td{background:rgba(255,255,255,.02)}
 
 /* ═══════════════════════════════════════
    MODAL
 ═══════════════════════════════════════ */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:1000;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(10px);animation:overlayIn .18s ease-out}
-.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius) var(--radius) 0 0;width:100%;max-width:600px;max-height:92vh;overflow-y:auto;animation:modalSlideUp .22s cubic-bezier(.4,0,.2,1);will-change:transform}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:1000;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(10px);animation:overlayIn .2s ease-out}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius) var(--radius) 0 0;width:100%;max-width:600px;max-height:92vh;overflow-y:auto;animation:modalSlideUp .28s cubic-bezier(.32,.72,0,1);will-change:transform}
 @keyframes overlayIn{from{opacity:0}to{opacity:1}}
 @keyframes modalSlideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
 .modal::before{content:'';display:block;width:32px;height:3px;background:var(--border2);border-radius:2px;margin:11px auto 6px}
@@ -311,11 +316,12 @@ tr:hover td{background:rgba(255,255,255,.015)}
 /* ═══════════════════════════════════════
    TUTORIAL
 ═══════════════════════════════════════ */
-.tutorial-step{display:flex;gap:12px;margin-bottom:8px;padding:14px 15px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:border-color .15s}
+.tutorial-step{display:flex;gap:12px;margin-bottom:8px;padding:14px 15px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:border-color .15s ease}
 .tutorial-step:hover{border-color:var(--border2)}
 .step-num{width:28px;height:28px;min-width:28px;background:var(--bg3);color:var(--text2);border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;border:1px solid var(--border);flex-shrink:0;font-family:'Geist Mono','DM Mono',monospace}
 .step-title{font-weight:800;font-size:13px;margin-bottom:3px;letter-spacing:-.15px}
 .step-desc{font-size:12.5px;color:var(--text2);line-height:1.7;font-weight:400}
+.tut-step-title{font-size:13px;color:var(--text)}
 
 /* ═══════════════════════════════════════
    BADGES
@@ -334,11 +340,14 @@ tr:hover td{background:rgba(255,255,255,.015)}
 .earn-title{font-size:10.5px;color:var(--text2);margin-bottom:8px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
 .earn-val{font-size:32px;font-weight:900;color:var(--green);margin-bottom:3px;letter-spacing:-.8px;font-variant-numeric:tabular-nums;font-family:'Geist Mono','DM Mono',monospace}
 .earn-sub{font-size:12px;color:var(--text2);font-weight:400}
+.earn-val-big{font-size:22px;font-variant-numeric:tabular-nums}
+.earn-values-row{display:flex;gap:20px;flex-wrap:wrap;margin-top:8px}
 
 /* ═══════════════════════════════════════
    TOAST
 ═══════════════════════════════════════ */
-#toast{position:fixed;bottom:calc(var(--bnav-h) + 14px);left:50%;transform:translateX(-50%) translateY(10px);background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:10px 18px;font-size:12.5px;font-weight:700;z-index:9999;opacity:0;transition:opacity .22s cubic-bezier(.4,0,.2,1),transform .22s cubic-bezier(.4,0,.2,1);pointer-events:none;white-space:nowrap;font-family:'Geist','Inter',system-ui,sans-serif;letter-spacing:.05px;will-change:opacity,transform}
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:10px 18px;font-size:12.5px;font-weight:700;z-index:9999;opacity:0;transition:opacity .22s cubic-bezier(.4,0,.2,1),transform .22s cubic-bezier(.4,0,.2,1);pointer-events:none;white-space:nowrap;font-family:'Geist','Inter',system-ui,sans-serif;letter-spacing:.05px;will-change:opacity,transform}
+@media(max-width:768px){#toast{bottom:calc(var(--bnav-h) + 14px)}}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 #toast.success{border-left:2px solid var(--green);color:var(--text)}
 #toast.error{border-left:2px solid var(--red);color:var(--text)}
@@ -355,28 +364,122 @@ tr:hover td{background:rgba(255,255,255,.015)}
    MOBILE
 ═══════════════════════════════════════ */
 @media(max-width:768px){
-  #sidebar{position:fixed;left:0;top:0;bottom:0;width:260px;z-index:300;transform:translateX(-260px);transition:transform .22s cubic-bezier(.25,0,.25,1);will-change:transform;backface-visibility:hidden;box-shadow:4px 0 24px rgba(0,0,0,.45)}
+  /* ── Layout ── */
+  #sidebar{position:fixed;left:0;top:0;bottom:0;width:min(260px,calc(100vw - 56px));z-index:300;transform:translateX(-100%);transition:transform .22s cubic-bezier(.25,0,.25,1);will-change:transform;backface-visibility:hidden;box-shadow:4px 0 24px rgba(0,0,0,.45)}
   #sidebar.open{transform:translateX(0)}
   .nav-item:active{background:rgba(255,255,255,.09);transform:scale(.98)}
   #main{width:100%}
   .topbar-menu{display:flex;font-size:22px}
   #bottom-nav{display:block}
-  #content{padding:14px;padding-bottom:calc(var(--bnav-h) + 48px)}
+  #content{padding:14px;padding-bottom:calc(var(--bnav-h) + 72px)}
   .form-row-2{grid-template-columns:1fr}
   .stats-grid{grid-template-columns:repeat(2,1fr)}
   .sidebar-overlay{position:fixed;inset:0;z-index:299;opacity:0;pointer-events:none;transition:opacity .22s cubic-bezier(.25,0,.25,1);background:rgba(0,0,0,.55);will-change:opacity}
   .sidebar-overlay::before{content:'';position:absolute;inset:0;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
   .sidebar-overlay.show{opacity:1;pointer-events:auto}
+
+  /* ── Bottom nav ── */
+  .bnav-item{font-size:11px}
+
+  /* ── Lead actions ── */
   .lead-actions{gap:5px}
-  .lead-actions .btn-sm{padding:8px 9px;font-size:11.5px;flex:1;justify-content:center}
+  .lead-actions .btn-sm{padding:9px 10px;font-size:13px;flex:1;justify-content:center}
+
+  /* ── Font: stat cards ── */
+  .stat-lbl{font-size:12px}
+  .stat-card{min-height:88px}
+
+  /* ── Font: forms ── */
+  .form-label{font-size:12px}
+  #content .card .form-label{font-size:12px}
+  #login-screen .form-label{font-size:12px}
+
+  /* ── Font: inputs ── */
+  .input,.input.select{padding:13px 14px;font-size:15px}
+  .input.select{padding-right:34px}
+  .input::placeholder,.search-input::placeholder{color:#4a5270}
+
+  /* ── Font: chips / filter ── */
+  .chip{font-size:12.5px;padding:7px 14px}
+
+  /* ── Font: lead card details ── */
+  .lead-num{font-size:12px}
+  .lead-meta{font-size:12px}
+  .lead-niche,.lead-status{font-size:11.5px;padding:3px 9px}
+  .lead-card{padding:15px}
+
+  /* ── Font: status buttons ── */
+  .status-btn{font-size:13px;padding:9px 6px}
+
+  /* ── Font: table ── */
+  th{font-size:11.5px}
+  td{font-size:13px}
+
+  /* ── Font: section ── */
+  .section-sub{font-size:13px}
+  .section-header{margin-bottom:18px}
+
+  /* ── Font: script modal ── */
+  .script-text{font-size:14px;line-height:1.8}
+  .obj-q{font-size:13px}
+
+  /* ── Font: earn card ── */
+  .earn-sub{font-size:13.5px}
+
+  /* ── Font: payment ── */
+  .payment-meta{font-size:12.5px}
+
+  /* ── Font: caller cards ── */
+  .caller-stat-lbl{font-size:11px}
+
+  /* ── Font: reports ── */
+  .report-stat-lbl{font-size:11px}
+
+  /* ── Font: badges ── */
+  .badge{font-size:11.5px;padding:3px 8px}
+
+  /* ── Font: sidebar ── */
+  .sidebar-logo .logo-sub{font-size:12px}
+  .sidebar-user .user-role{font-size:11px}
+  .nav-label{font-size:12px}
+  .nav-item{font-size:14px}
+
+  /* ── Font: topbar ── */
+  .topbar-badge{font-size:12px}
+
+  /* ── Font: deal meta ── */
+  .deal-meta{font-size:12.5px}
+
+  /* ── Font: login ── */
+  .login-tagline{font-size:14px}
+
+  /* ── Touch: buttons ── */
+  .btn:not(.btn-xs){min-height:44px}
+  .search-input{padding:13px 12px 13px 38px;font-size:14px}
+
+  /* ── Visual: card padding ── */
+  .card{padding:16px 14px}
+
+  /* ── Visual: progress bar ── */
+  .progress-bar{height:4px}
+
+  /* ── Modal polish ── */
+  .modal{max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
+  .logout-modal-box{max-width:min(290px,calc(100vw - 40px))}
+
+  /* ── Earn card tutorial ── */
+  .earn-val-big{font-size:18px}
+  .earn-values-row{gap:12px}
+  .tut-step-title{font-size:14px}
 }
 
 /* ═══════════════════════════════════════
    SCROLLBAR
 ═══════════════════════════════════════ */
-::-webkit-scrollbar{width:3px;height:3px}
+::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;transition:background .2s}
+::-webkit-scrollbar-thumb:hover{background:var(--text3)}
 
 /* ═══════════════════════════════════════
    EMPTY STATE
@@ -433,23 +536,32 @@ tr:hover td{background:rgba(255,255,255,.015)}
 .add-lead-form{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:12px}
 
 /* ═══════════════════════════════════════
-   EXTRA POLISH
+   FUTURE BATCH
 ═══════════════════════════════════════ */
+.fbatch-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:7px}
+.fbatch-label{flex:1;font-weight:700;font-size:13px;color:var(--text)}
+.fbatch-meta{font-size:11px;color:var(--text2);margin-top:2px}
+.fbatch-assign-btn{padding:5px 12px;border-radius:6px;font-size:11.5px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text2);font-family:'Geist','Inter',system-ui,sans-serif;transition:background .13s,color .13s,border-color .13s}
+.fbatch-assign-btn:hover{background:var(--green-dim);color:var(--green);border-color:rgba(34,197,94,.2)}
+.fbatch-assign-btn.assigned{background:var(--green-dim);color:var(--green);border-color:rgba(34,197,94,.25)}
+.fbatch-del-btn{padding:5px 9px;border-radius:6px;font-size:11px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text3);font-family:'Geist','Inter',system-ui,sans-serif;transition:background .13s,color .13s}
+.fbatch-del-btn:hover{background:var(--red-dim);color:var(--red);border-color:rgba(239,68,68,.2)}
+
 .nav-section .nav-label:not(:first-child){margin-top:6px}
 .lead-card:hover{border-color:var(--border2)}
 td:first-child{font-family:'Geist Mono','DM Mono',monospace;font-size:12px}
 .caller-stat-val{font-family:'Geist Mono','DM Mono',monospace}
 #topbar{box-shadow:0 1px 0 var(--border)}
 .section-header{padding-bottom:12px;border-bottom:1px solid var(--border);margin-bottom:16px}
-#content > *{animation:fadeUp .18s ease-out;will-change:opacity,transform}
-@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+#content > *{animation:fadeUp .2s cubic-bezier(.4,0,.2,1) both;will-change:opacity,transform}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
 <body>
 
 <div id="loading">
   <div class="loading-spinner"></div>
-  <span style="color:var(--text2);font-size:12.5px;font-weight:600;letter-spacing:.5px;text-transform:uppercase">Loading CRM…</span>
+  <span style="color:var(--text2);font-size:14px;font-weight:600;letter-spacing:.5px;text-transform:uppercase">Loading CRM…</span>
 </div>
 <div id="sidebar-overlay" class="sidebar-overlay" onclick="closeSidebar()"></div>
 <div id="toast"></div>
@@ -458,7 +570,7 @@ td:first-child{font-family:'Geist Mono','DM Mono',monospace;font-size:12px}
 <div id="login-screen">
 <div class="login-card">
   <div class="login-logo">Nex <span style="color:var(--text2);font-weight:400">Studio</span></div>
-  <div class="login-tagline">Caller CRM · v4.0</div>
+  <div class="login-tagline">Caller CRM · v4.2</div>
   <div class="login-tabs">
     <div class="login-tab active" onclick="setLoginRole('admin')">Admin</div>
     <div class="login-tab" onclick="setLoginRole('caller')">Caller</div>
@@ -482,7 +594,7 @@ td:first-child{font-family:'Geist Mono','DM Mono',monospace;font-size:12px}
 <div id="sidebar">
   <div class="sidebar-logo">
     <div class="logo-text">Nex <span>Studio</span></div>
-    <div class="logo-sub">Caller CRM v4.0</div>
+    <div class="logo-sub">Caller CRM v4.2</div>
   </div>
 
   <div class="sidebar-user">
@@ -529,26 +641,24 @@ td:first-child{font-family:'Geist Mono','DM Mono',monospace;font-size:12px}
 // ═══════════════════════════════════════════════
 // ── Firebase REST API shim (no SDK needed) ──────
 const FB_URL='https://nex-crm-2c1b1-default-rtdb.asia-southeast1.firebasedatabase.app';
-const FB_KEY='AIzaSyBB7ufaPvpmxSQM_H15h2tFoC5Q4Hgixug';
-
 // FIX 1: All REST helpers now throw on non-OK so callers can catch failures
 async function fbGet(path){
   try{
-    const r=await fetch(`${FB_URL}/${path}.json?auth=${FB_KEY}`);
+    const r=await fetch(`${FB_URL}/${path}.json`);
     if(!r.ok)throw new Error(`fbGet ${path} ${r.status}`);
     return r.json();
   }catch(e){console.warn('[Firebase] GET failed:',e.message);return null;}
 }
 async function fbSet(path,data){
-  const r=await fetch(`${FB_URL}/${path}.json?auth=${FB_KEY}`,{method:'PUT',body:JSON.stringify(data),headers:{'Content-Type':'application/json'}});
+  const r=await fetch(`${FB_URL}/${path}.json`,{method:'PUT',body:JSON.stringify(data),headers:{'Content-Type':'application/json'}});
   if(!r.ok)throw new Error(`fbSet ${path} ${r.status}`);
 }
 async function fbUpdate(path,data){
-  const r=await fetch(`${FB_URL}/${path}.json?auth=${FB_KEY}`,{method:'PATCH',body:JSON.stringify(data),headers:{'Content-Type':'application/json'}});
+  const r=await fetch(`${FB_URL}/${path}.json`,{method:'PATCH',body:JSON.stringify(data),headers:{'Content-Type':'application/json'}});
   if(!r.ok)throw new Error(`fbUpdate ${path} ${r.status}`);
 }
 async function fbDelete(path){
-  const r=await fetch(`${FB_URL}/${path}.json?auth=${FB_KEY}`,{method:'DELETE'});
+  const r=await fetch(`${FB_URL}/${path}.json`,{method:'DELETE'});
   if(!r.ok)throw new Error(`fbDelete ${path} ${r.status}`);
 }
 
@@ -617,7 +727,7 @@ function _startSSE(){
   if(_sseSource){try{_sseSource.close();}catch(e){}_sseSource=null;}
   _sseConnected=false;
 
-  const src=new EventSource(`${FB_URL}/.json?auth=${FB_KEY}`);
+  const src=new EventSource(`${FB_URL}/.json`);
   _sseSource=src;
 
   src.addEventListener('put',e=>{
@@ -1494,13 +1604,15 @@ function getWA(lead,callerName){
 }
 function getStatusClass(s){return{interested:'status-interested','not-interested':'status-not',dnp:'status-dnp',later:'status-later'}[s]||'status-none';}
 function getStatusLabel(s){return{interested:'Interested','not-interested':'Not Int.',dnp:'Didn\'t Pick',later:'Call Later'}[s]||'';}
-function showToast(msg,type='info'){const t=document.getElementById('toast');t.textContent=msg;t.className='show '+type;clearTimeout(t._t);t._t=setTimeout(()=>t.className='',2500);}
+let _toastTimer=null;
+function showToast(msg,type='info'){const t=document.getElementById('toast');if(!t)return;t.textContent=msg;t.className='show '+type;clearTimeout(_toastTimer);_toastTimer=setTimeout(()=>{t.className='';},2500);}
+function _copyText(text,successMsg){if(navigator.clipboard){navigator.clipboard.writeText(text).then(()=>showToast(successMsg||'Copied!','success')).catch(()=>showToast('Copy failed','error'));}else{const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);showToast(successMsg||'Copied!','success');}}
 function $$(id){return document.getElementById(id);}
 function setPage(page){currentPage=page;_lastRenderedHTML='';renderPage();}
 function closeSidebar(){$$('sidebar').classList.remove('open');$$('sidebar-overlay').classList.remove('show');}
 function toggleSidebar(){$$('sidebar').classList.toggle('open');$$('sidebar-overlay').classList.toggle('show');}
-function openModal(html){$$('modal-container').innerHTML=html;document.removeEventListener('keydown',escModal);document.addEventListener('keydown',escModal);}
-function closeModal(){$$('modal-container').innerHTML='';document.removeEventListener('keydown',escModal);}
+function openModal(html){const mc=$$('modal-container');if(!mc)return;mc.innerHTML=html;document.removeEventListener('keydown',escModal);document.addEventListener('keydown',escModal);}
+function closeModal(){const mc=$$('modal-container');if(mc)mc.innerHTML='';document.removeEventListener('keydown',escModal);}
 function escModal(e){if(e.key==='Escape')closeModal();}
 function fmtDate(ts){if(!ts)return'-';const d=new Date(ts);return d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});}
 function fmtCur(n){return'₹'+Number(n||0).toLocaleString('en-IN');}
@@ -1516,8 +1628,10 @@ function setLoginRole(r){
   $$('login-user').value='';
 }
 function doLogin(){
-  const u=$$('login-user').value.trim();
-  const p=$$('login-pass').value; // do NOT trim password - spaces matter
+  const uEl=$$('login-user'),pEl=$$('login-pass');
+  if(!uEl||!pEl){showToast('Login form not found','error');return;}
+  const u=uEl.value.trim();
+  const p=pEl.value; // do NOT trim password - spaces matter
   if(!u||!p){showToast('Enter credentials','error');return;}
   if(loginRole==='admin'){
     if(u===ADMIN.id&&p===adminPass){loginAs({...ADMIN,pass:adminPass});return;}
@@ -1692,9 +1806,21 @@ function getMyLeads(){
   const batches=getCallerBatches(currentUser.id);
   let leads=[];
   batches.forEach(b=>{leads=[...leads,...getBatch(b)];});
-  // also any individually added leads
+  // individually added leads (dedup against batch leads)
   const extra=(fbData.extraLeads&&fbData.extraLeads[currentUser.id])||[];
-  extra.forEach(l=>leads.push(l));
+  extra.forEach(l=>{if(!leads.find(x=>x.id===l.id))leads.push(l);});
+  // future batch leads
+  const myFutureBatches=fbData.callerFutureBatches?.[currentUser.id]||{};
+  Object.keys(myFutureBatches).forEach(key=>{
+    const fb=fbData.futureBatches?.[key];
+    if(!fb||!fb.leads)return;
+    fb.leads.forEach(lid=>{
+      if(!leads.find(l=>l.id===lid)){
+        const raw=getLead(lid);
+        if(raw)leads.push(leadObj(raw));
+      }
+    });
+  });
   return leads;
 }
 function getAssignment(callerId,leadId){return (fbData.assignments&&fbData.assignments[callerId]&&fbData.assignments[callerId][leadId])||{};}
@@ -1794,7 +1920,7 @@ function renderAssign(){
   <div class="assign-title">Assign Lead Batches to Caller</div>
   <div class="form-row form-row-2">
     <div class="form-group"><label class="form-label">Select Caller</label>
-    <select class="input select" id="assign-caller">${callers.map(c=>`<option value="${c.id}">${c.name} (${c.id})</option>`).join('')}${!callers.length?'<option disabled>No callers — add in Callers tab</option>':''}</select></div>
+    <select class="input select" id="assign-caller" onchange="syncBatchBtns()">${callers.map(c=>`<option value="${c.id}">${c.name} (${c.id})</option>`).join('')}${!callers.length?'<option disabled>No callers — add in Callers tab</option>':''}</select></div>
   </div>
   <div class="section-title" style="margin-bottom:10px;font-size:13px;color:var(--text2)">Select Batches (each = 30 leads)</div>
   <div class="batch-grid" id="batch-grid">${Array.from({length:totalBatches},(_,i)=>{
@@ -1831,6 +1957,18 @@ function renderAssign(){
     <button class="btn btn-amber btn-sm" onclick="resetCallerProgress()">Reset Status</button>
     <button class="btn btn-blue btn-sm" onclick="copyAllLeads()">Copy Lead Names</button>
   </div>
+</div>
+<div class="assign-panel">
+  <div class="assign-title">Future Call List</div>
+  <div style="font-size:12px;color:var(--text2);margin-bottom:14px">Create custom batches with specific lead IDs — then assign them to any caller</div>
+  <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;margin-bottom:14px">
+    <div class="form-group" style="margin-bottom:10px"><label class="form-label">Batch Name / Label</label>
+    <input class="input" id="fb-name" placeholder="e.g. Eye Clinics Follow-up, Warm Leads May"/></div>
+    <div class="form-group" style="margin-bottom:10px"><label class="form-label">Lead IDs (comma-separated)</label>
+    <input class="input" id="fb-leads" placeholder="e.g. R12, R45, R201, R350"/></div>
+    <button class="btn btn-primary btn-sm" onclick="saveFutureBatch()">+ Save Batch</button>
+  </div>
+  <div id="future-batches-list">${renderFutureBatchesHTML(callers)}</div>
 </div>`);
   syncBatchBtns();
 }
@@ -1891,7 +2029,72 @@ function resetCallerProgress(){
 }
 function copyAllLeads(){
   const text=R7_LEADS.map((l,i)=>`${i+1}. ${l[1]} — ${l[2]}`).join('\n');
-  navigator.clipboard.writeText(text).then(()=>showToast('Copied 718 leads!','success'));
+  if(navigator.clipboard){navigator.clipboard.writeText(text).then(()=>showToast('Copied 718 leads!','success')).catch(()=>showToast('Copy failed','error'));}
+  else{const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);showToast('Copied 718 leads!','success');}
+}
+
+// ─── FUTURE CALL LIST ────────────────────────────
+function renderFutureBatchesHTML(callers){
+  const batches=fbData.futureBatches?Object.entries(fbData.futureBatches):[];
+  if(!batches.length)return`<div class="empty" style="padding:24px 0"><div class="empty-icon" style="font-size:28px">📋</div><div class="empty-text">No future batches yet</div><div class="empty-sub">Create one above to get started</div></div>`;
+  return batches.map(([key,b])=>{
+    const leadCount=(b.leads||[]).length;
+    // Check which callers have this batch assigned
+    const assignedTo=(fbData.callerFutureBatches?Object.entries(fbData.callerFutureBatches):[]).filter(([,cb])=>cb&&cb[key]).map(([cid])=>fbData.callers?.[cid]?.name||cid);
+    return`<div class="fbatch-item">
+  <div style="flex:1">
+    <div class="fbatch-label">${b.name||'Unnamed Batch'}</div>
+    <div class="fbatch-meta">${leadCount} lead${leadCount!==1?'s':''} · ${b.leads?.slice(0,5).join(', ')}${leadCount>5?` +${leadCount-5} more`:''}</div>
+    ${assignedTo.length?`<div style="font-size:10.5px;color:var(--green);margin-top:3px;font-weight:700">Assigned to: ${assignedTo.join(', ')}</div>`:''}
+  </div>
+  <select class="input select" id="fb-assign-${key}" style="width:auto;min-width:110px;padding:6px 28px 6px 10px;font-size:11.5px;background:var(--bg3)">
+    <option value="">Assign to…</option>
+    ${callers.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')}
+  </select>
+  <button class="fbatch-assign-btn${assignedTo.length?' assigned':''}" onclick="assignFutureBatch('${key}')">Assign</button>
+  <button class="fbatch-del-btn" onclick="deleteFutureBatch('${key}')">🗑</button>
+</div>`;
+  }).join('');
+}
+function saveFutureBatch(){
+  const name=$$('fb-name')?.value.trim();
+  const rawLeads=$$('fb-leads')?.value.trim();
+  if(!name){showToast('Enter a batch name','error');return;}
+  if(!rawLeads){showToast('Enter at least one lead ID','error');return;}
+  const leads=rawLeads.split(',').map(s=>s.trim().toUpperCase()).filter(s=>s.match(/^R\d+$/));
+  if(!leads.length){showToast('No valid lead IDs found (use format R1, R45…)','error');return;}
+  // Validate all IDs exist
+  const invalid=leads.filter(lid=>!R7_LEADS.find(l=>l[0]===lid));
+  if(invalid.length){showToast(`Invalid IDs: ${invalid.slice(0,3).join(', ')}${invalid.length>3?' …':''}`,'error');return;}
+  const key='fb_'+Date.now();
+  db.ref(`futureBatches/${key}`).set({name,leads,createdAt:Date.now()}).then(()=>{
+    showToast(`Batch "${name}" saved with ${leads.length} leads`,'success');
+    $$('fb-name').value='';
+    $$('fb-leads').value='';
+  });
+}
+function assignFutureBatch(key){
+  const cid=$$(`fb-assign-${key}`)?.value;
+  if(!cid){showToast('Select a caller first','error');return;}
+  const cname=fbData.callers?.[cid]?.name||cid;
+  const bname=fbData.futureBatches?.[key]?.name||key;
+  db.ref(`callerFutureBatches/${cid}/${key}`).set(true).then(()=>{
+    showToast(`"${bname}" assigned to ${cname}`,'success');
+  });
+}
+function deleteFutureBatch(key){
+  const bname=fbData.futureBatches?.[key]?.name||key;
+  if(!confirm(`Delete batch "${bname}"? This will also unassign it from all callers.`))return;
+  // Remove from futureBatches and all callerFutureBatches
+  const deletes=[db.ref(`futureBatches/${key}`).remove()];
+  if(fbData.callerFutureBatches){
+    Object.keys(fbData.callerFutureBatches).forEach(cid=>{
+      if(fbData.callerFutureBatches[cid]?.[key]){
+        deletes.push(db.ref(`callerFutureBatches/${cid}/${key}`).remove());
+      }
+    });
+  }
+  Promise.all(deletes).then(()=>showToast(`Batch deleted`,'success'));
 }
 
 // ─── CALLERS ────────────────────────────────────
@@ -2031,19 +2234,20 @@ function exportReportsCSV(){
   });
   const csv=rows.map(r=>r.join(',')).join('\n');
   const blob=new Blob([csv],{type:'text/csv'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='nex-crm-report-'+new Date().toISOString().split('T')[0]+'.csv';a.click();
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='nex-crm-report-'+new Date().toISOString().split('T')[0]+'.csv';document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),1000);
   showToast('CSV exported!','success');
 }
 // ─── PAYMENTS (ADMIN) ───────────────────────────
 function renderPayments(){
-  const payments=fbData.payments?Object.values(fbData.payments):[];
+  const paymentsWithKeys=Object.entries(fbData.payments||{}).map(([k,p])=>({...p,_key:k}));
   const payDetails=fbData.payDetails||{};
   _setContent(`
 <div class="section-header">
   <div><div class="section-title">Payments</div><div class="section-sub">Record and track caller payments</div></div>
   <button class="btn btn-primary btn-sm" onclick="openAddPayment()">+ Record Payment</button>
 </div>
-${payments.sort((a,b)=>b.ts-a.ts).map((p,_,arr)=>{const key=Object.entries(fbData.payments||{}).find(([k,v])=>v.ts===p.ts&&v.callerId===p.callerId)?.[0]||'';return`<div class="payment-card" style="position:relative">
+${paymentsWithKeys.sort((a,b)=>b.ts-a.ts).map(p=>{const key=p._key;return`<div class="payment-card" style="position:relative">
   <div class="payment-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--green)"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
   <div class="payment-info">
     <div class="payment-name">${p.callerName} <span class="badge badge-purple">${p.type||'payment'}</span></div>
@@ -2052,8 +2256,8 @@ ${payments.sort((a,b)=>b.ts-a.ts).map((p,_,arr)=>{const key=Object.entries(fbDat
   <div class="payment-amount">${fmtCur(p.amount)}</div>
   ${key?`<button class="btn btn-danger btn-xs" style="margin-left:10px;min-width:32px" onclick="deletePaymentRecord('${key}')" title="Delete record">🗑</button>`:''}
 </div>`}).join('')}
-${!payments.length?'<div class="empty"><div class="empty-icon"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v12M9 9h4.5a2.5 2.5 0 0 1 0 5H9"/></svg></div><div class="empty-text">No payments yet</div></div>':''}
-${payments.length?`<div style="margin-top:8px;text-align:right"><button class="btn btn-danger btn-sm" onclick="clearAllPayments()">Clear All History</button></div>`:''}
+${!paymentsWithKeys.length?'<div class="empty"><div class="empty-icon"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v12M9 9h4.5a2.5 2.5 0 0 1 0 5H9"/></svg></div><div class="empty-text">No payments yet</div></div>':''}
+${paymentsWithKeys.length?`<div style="margin-top:8px;text-align:right"><button class="btn btn-danger btn-sm" onclick="clearAllPayments()">Clear All History</button></div>`:''}
 <div class="divider"></div>
 <div class="section-title" style="margin-bottom:14px">Caller Payment Details (UPI)</div>
 ${Object.entries(payDetails).map(([callerId,d])=>`<div class="card-sm" style="margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
@@ -2098,13 +2302,14 @@ function clearAllPayments(){
 
 // ─── DEALS (ADMIN) ──────────────────────────────
 function renderDeals(){
-  const deals=fbData.deals?Object.values(fbData.deals):[];
+  const dealsWithKeys=Object.entries(fbData.deals||{}).map(([k,d])=>({...d,_key:k}));
+  const totalVal=dealsWithKeys.reduce((s,d)=>s+Number(d.amount||0),0);
   _setContent(`
 <div class="section-header">
-  <div><div class="section-title">Deals Closed</div><div class="section-sub">Total: ${fmtCur(deals.reduce((s,d)=>s+Number(d.amount||0),0))}</div></div>
+  <div><div class="section-title">Deals Closed</div><div class="section-sub">Total: ${fmtCur(totalVal)}</div></div>
   <button class="btn btn-success btn-sm" onclick="openLogDeal(true)">+ Log Deal</button>
 </div>
-${deals.sort((a,b)=>b.ts-a.ts).map(d=>{const key=Object.entries(fbData.deals||{}).find(([k,v])=>v.ts===d.ts&&v.callerId===d.callerId)?.[0]||'';const isPending=!d.status||d.status==='pending';const isApproved=d.status==='approved';const isRejected=d.status==='rejected';return`<div class="deal-card" style="border-left-color:${isPending?'var(--amber)':isApproved?'var(--green)':'var(--red)'}">
+${dealsWithKeys.sort((a,b)=>b.ts-a.ts).map(d=>{const key=d._key;const isPending=!d.status||d.status==='pending';const isApproved=d.status==='approved';const isRejected=d.status==='rejected';const safeCallerName=(d.callerName||'').replace(/'/g,'\u2019');return`<div class="deal-card" style="border-left-color:${isPending?'var(--amber)':isApproved?'var(--green)':'var(--red)'}">
   <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
     <div class="deal-biz">${d.bizName}</div>
     <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
@@ -2118,10 +2323,10 @@ ${deals.sort((a,b)=>b.ts-a.ts).map(d=>{const key=Object.entries(fbData.deals||{}
     <span>${d.leadId||''}</span>
   </div>
   ${d.note?`<div style="margin-top:6px;font-size:12px;color:var(--text2)">${d.note}</div>`:''}
-  ${key&&isPending?`<div style="display:flex;gap:7px;margin-top:10px"><button class="btn btn-success btn-sm" onclick="approveDeal('${key}','${d.callerName}',${d.amount})">Approve</button><button class="btn btn-danger btn-sm" onclick="rejectDeal('${key}')">Reject</button></div>`:''}
+  ${key&&isPending?`<div style="display:flex;gap:7px;margin-top:10px"><button class="btn btn-success btn-sm" onclick="approveDeal('${key}','${safeCallerName}',${d.amount})">Approve</button><button class="btn btn-danger btn-sm" onclick="rejectDeal('${key}')">Reject</button></div>`:''}
   ${key&&isApproved?`<div style="margin-top:8px"><button class="btn btn-ghost btn-sm" onclick="rejectDeal('${key}')">Undo / Reject</button></div>`:''}
 </div>`}).join('')}
-${!deals.length?'<div class="empty"><div class="empty-icon"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div><div class="empty-text">No deals yet</div></div>':''}`);
+${!dealsWithKeys.length?'<div class="empty"><div class="empty-icon"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div><div class="empty-text">No deals yet</div></div>':''}`);
 }
 function openLogDeal(isAdmin,prefill){
   const callers=fbData.callers?Object.values(fbData.callers):[];
@@ -2185,7 +2390,7 @@ function renderSettings(){
     <div>🗂 Total Batches: <strong style="color:var(--text)">${getTotalBatches()}</strong></div>
     <div>👥 Max Callers: <strong style="color:var(--text)">20</strong></div>
     <div>Commission: <strong style="color:var(--green)">₹1,000/deal</strong></div>
-    <div>Firebase: <strong style="color:var(--green)">Connected ✓</strong></div>
+    <div>Firebase: <strong id="fb-status-txt" style="color:${_sseConnected?'var(--green)':'var(--amber)'}">${_sseConnected?'Connected ✓':'Connecting…'}</strong></div>
   </div>
 </div>`);
 }
@@ -2447,9 +2652,7 @@ function setStatus(leadId,status){
   const myAssign=fbData.assignments?.[currentUser.id]||{};
   const cur=myAssign[leadId]?.status;
   const newStatus=cur===status?null:status;
-  // When clearing a status, also clear calledTs so Today's Calls count drops correctly
   const update={status:newStatus,ts:Date.now()};
-  if(!newStatus) update.calledTs=null;
   setAssignment(currentUser.id,leadId,update);
   if(newStatus==='interested')showToast('Marked Interested! 🎉','success');
   else if(newStatus)showToast('Status updated','info');
@@ -2457,8 +2660,9 @@ function setStatus(leadId,status){
 }
 function openLeadNote(leadId){
   const a=getAssignment(currentUser.id,leadId)||{};
-  const lead=R7_LEADS.find(x=>x[0]===leadId);
-  const biz=lead?lead[1]:leadId;
+  const allLeads=getMyLeads();
+  const lead=allLeads.find(x=>x.id===leadId);
+  const biz=lead?lead.name:leadId;
   openModal(`<div class="modal-overlay" onclick="if(event.target===this)closeModal()"><div class="modal">
   <div class="modal-header"><div class="modal-title">Note — ${biz}</div><button class="modal-close" onclick="closeModal()">✕</button></div>
   <div class="modal-body">
@@ -2540,7 +2744,7 @@ function openScript(leadId){
     <div class="objection-item"><div class="obj-q">❓ "I'll think about it"</div><div class="obj-a">Absolutely, take your time! I'll WhatsApp you the link so you can check it at your convenience. Is that okay?</div></div>
     </div>
     <div class="script-section"><div class="script-label">Demo Link</div>
-    <div class="script-text" style="cursor:pointer" onclick="navigator.clipboard.writeText('${lead.demo}').then(()=>showToast('Demo link copied!','success'))">${lead.demo} <span style="color:var(--accent);font-size:12px">tap to copy</span></div></div>
+    <div class="script-text" style="cursor:pointer" onclick="_copyText('${lead.demo}','Demo link copied!')">${lead.demo} <span style="color:var(--accent);font-size:12px">tap to copy</span></div></div>
   </div>
   <div class="modal-footer">
     <a href="${getWA(lead,currentUser.name)}" target="_blank" class="btn btn-success">Send WA Now</a>
@@ -2560,7 +2764,7 @@ function renderMyReports(){
   const notInt=allAssigns.filter(a=>a.status==='not-interested').length;
   const dnp=allAssigns.filter(a=>a.status==='dnp').length;
   const later=allAssigns.filter(a=>a.status==='later').length;
-  const myDeals=(fbData.deals?Object.values(fbData.deals):[]). filter(d=>d.callerId===currentUser.id);
+  const myDeals=(fbData.deals?Object.values(fbData.deals):[]).filter(d=>d.callerId===currentUser.id);
   const todayStr=new Date().toDateString();
   const todayCalls=allAssigns.filter(a=>a.calledTs&&new Date(a.calledTs).toDateString()===todayStr).length;
   const todayPct=Math.min(100,Math.round(todayCalls/30*100));
@@ -2727,12 +2931,12 @@ function renderTutorial(){
 <div class="section-sub" style="margin-bottom:16px">Tap a step to expand it</div>
 <div class="earn-card">
   <div class="earn-title">Your Earning Potential</div>
-  <div style="display:flex;gap:20px;flex-wrap:wrap;margin-top:8px">
-    <div><div style="font-size:22px;font-weight:900;color:var(--text);font-family:'Geist Mono','DM Mono',monospace">₹100/day</div><div style="font-size:12px;color:var(--text2)">Complete 30 calls/day</div></div>
+  <div style="display:flex;gap:20px;flex-wrap:wrap;margin-top:8px" class="earn-values-row">
+    <div><div class="earn-val-big" style="font-weight:900;color:var(--text);font-family:'Geist Mono','DM Mono',monospace">₹100/day</div><div style="font-size:12px;color:var(--text2)">Complete 30 calls/day</div></div>
     <div style="width:1px;background:var(--border)"></div>
-    <div><div style="font-size:22px;font-weight:900;color:var(--green);font-family:'Geist Mono','DM Mono',monospace">₹1,000/deal</div><div style="font-size:12px;color:var(--text2)">Per closed deal</div></div>
+    <div><div class="earn-val-big" style="font-weight:900;color:var(--green);font-family:'Geist Mono','DM Mono',monospace">₹1,000/deal</div><div style="font-size:12px;color:var(--text2)">Per closed deal</div></div>
     <div style="width:1px;background:var(--border)"></div>
-    <div><div style="font-size:22px;font-weight:900;color:var(--text2);font-family:'Geist Mono','DM Mono',monospace">₹30,000+</div><div style="font-size:12px;color:var(--text2)">30 deals/month potential</div></div>
+    <div><div class="earn-val-big" style="font-weight:900;color:var(--text2);font-family:'Geist Mono','DM Mono',monospace">₹30,000+</div><div style="font-size:12px;color:var(--text2)">30 deals/month potential</div></div>
   </div>
 </div>
 <div id="tutorial-steps">
@@ -2751,10 +2955,10 @@ ${[
 <div class="tutorial-step" style="cursor:pointer;flex-direction:column;gap:0;padding:0;overflow:hidden" onclick="toggleTutStep(${i})">
   <div style="display:flex;align-items:center;gap:13px;padding:14px 16px">
     <div class="step-num">${i+1}</div>
-    <div style="flex:1;font-weight:700;font-size:13px">${title}</div>
+    <div style="flex:1;font-weight:700" class="tut-step-title">${title}</div>
     <svg id="tut-arrow-${i}" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text3);transition:transform .2s;flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>
   </div>
-  <div id="tut-body-${i}" style="display:none;padding:0 16px 14px;padding-left:59px;font-size:12.5px;color:var(--text2);line-height:1.65">${desc}</div>
+  <div id="tut-body-${i}" style="display:none;padding:0 16px 14px;padding-left:59px;font-size:14px;color:var(--text2);line-height:1.7">${desc}</div>
 </div>`).join('')}
 </div>`);
 }
@@ -2769,17 +2973,37 @@ function toggleTutStep(i){
 // ═══════════════════════════════════════════════
 //  PWA MANIFEST
 // ═══════════════════════════════════════════════
-// Register Service Worker for PWA install + offline support
-if('serviceWorker' in navigator){
-  window.addEventListener('load', function(){
-    navigator.serviceWorker.register('./sw.js')
-      .then(function(reg){
-        console.log('[SW] Registered, scope:', reg.scope);
-      })
-      .catch(function(err){
-        console.warn('[SW] Registration failed:', err);
-      });
-  });
+(function(){
+  const manifest={name:'Nex CRM v4.2',short_name:'NexCRM',start_url:'.',display:'standalone',background_color:'#0a0b0f',theme_color:'#0a0b0f',icons:[{src:'https://ui-avatars.com/api/?name=N&background=ffffff&color=0a0b0f&size=192',sizes:'192x192',type:'image/png'}]};
+  const blob=new Blob([JSON.stringify(manifest)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  document.querySelector('#manifest-link').href=url;
+})();
+
+// ═══════════════════════════════════════════════
+//  PWA INSTALL PROMPT
+// ═══════════════════════════════════════════════
+let _installPromptEvt=null;
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();
+  _installPromptEvt=e;
+  setTimeout(()=>{
+    const badge=document.getElementById('topbar-badge');
+    if(badge&&_installPromptEvt){
+      badge.innerHTML=`<span style="cursor:pointer;color:var(--green);font-weight:700" onclick="triggerInstall()">📲 Install App</span>`;
+    }
+  },3000);
+});
+window.addEventListener('appinstalled',()=>{
+  _installPromptEvt=null;
+  showToast('App installed! Open from home screen 🎉','success');
+  const badge=document.getElementById('topbar-badge');
+  if(badge)badge.textContent='';
+});
+function triggerInstall(){
+  if(!_installPromptEvt){showToast('Open in Chrome to install','info');return;}
+  _installPromptEvt.prompt();
+  _installPromptEvt.userChoice.then(()=>{_installPromptEvt=null;});
 }
 
 // ═══════════════════════════════════════════════
