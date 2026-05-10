@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0a0b0f">
 <title>Nex Studio CRM</title>
-<link rel="manifest" href="#" id="manifest-link">
+<link rel="manifest" href="manifest.json" id="manifest-link">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800;900&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -2971,16 +2971,6 @@ function toggleTutStep(i){
   if(arrow)arrow.style.transform=open?'':'rotate(180deg)';
 }
 // ═══════════════════════════════════════════════
-//  PWA MANIFEST
-// ═══════════════════════════════════════════════
-(function(){
-  const manifest={name:'Nex CRM v4.2',short_name:'NexCRM',start_url:'.',display:'standalone',background_color:'#0a0b0f',theme_color:'#0a0b0f',icons:[{src:'https://ui-avatars.com/api/?name=N&background=ffffff&color=0a0b0f&size=192',sizes:'192x192',type:'image/png'}]};
-  const blob=new Blob([JSON.stringify(manifest)],{type:'application/json'});
-  const url=URL.createObjectURL(blob);
-  document.querySelector('#manifest-link').href=url;
-})();
-
-// ═══════════════════════════════════════════════
 //  PWA INSTALL PROMPT
 // ═══════════════════════════════════════════════
 let _installPromptEvt=null;
@@ -3010,6 +3000,19 @@ function triggerInstall(){
 //  INIT
 // ═══════════════════════════════════════════════
 window.addEventListener('load',()=>{
+  // Register service worker — only on real hosting (GitHub Pages), not in preview/localhost
+  if('serviceWorker' in navigator && location.hostname.endsWith('github.io')){
+    navigator.serviceWorker.register('./sw.js').then(reg=>{
+      reg.addEventListener('updatefound',()=>{
+        const newWorker=reg.installing;
+        newWorker.addEventListener('statechange',()=>{
+          if(newWorker.state==='installed'&&navigator.serviceWorker.controller){
+            showToast('Update available — refresh to get latest','info');
+          }
+        });
+      });
+    }).catch(err=>console.warn('[SW] Registration failed:',err));
+  }
   // Safety timeout — if anything goes wrong, always show login after 4s
   const loadingTimeout=setTimeout(()=>{
     const l=$$('loading');if(l)l.style.display='none';
