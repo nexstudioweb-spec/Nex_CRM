@@ -1,64 +1,124 @@
-\// Nex CRM Service Worker
-var CACHE = 'nex-crm-v4';
-var ASSETS = [
-  './',
+// ═══════════════════════════════════════════════
+//  Nex CRM — Service Worker
+//  Cache: nex-crm-v4
+// ═══════════════════════════════════════════════
+
+const CACHE_NAME = 'nex-crm-v4';
+
+// Assets to pre-cache on install
+const PRECACHE_URLS = [
   './index.html',
-  './manifest.json',
-  './icon-192.png',
-  './icon-512.png',
-  './favicon-32.png'
+  './manifest.json'
 ];
 
-// Install: cache all assets
-self.addEventListener('install', function(e){
-  e.waitUntil(
-    caches.open(CACHE).then(function(cache){
-      return cache.addAll(ASSETS);
-    })
+// ── Install: pre-cache shell ──────────────────
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => {
+      return cache.addAll(PRECACHE_URLS);
+    }).then(() => self.skipWaiting())
   );
-  self.skipWaiting();
 });
 
-// Activate: remove old caches
-self.addEventListener('activate', function(e){
-  e.waitUntil(
-    caches.keys().then(function(keys){
-      return Promise.all(
-        keys.filter(function(k){ return k !== CACHE; })
-            .map(function(k){ return caches.delete(k); })
-      );
-    })
+// ── Activate: delete old caches ───────────────
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(
+        keys
+          .filter(key => key !== CACHE_NAME)
+          .map(key => caches.delete(key))
+      )
+    ).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
-// Fetch: network first, fall back to cache
-self.addEventListener('fetch', function(e){
-  // Only handle GET requests
-  if(e.request.method !== 'GET') return;
+// ── Fetch strategy ────────────────────────────
+// Firebase REST + SSE: always network (never cache API calls)
+// Google Fonts: cache-first
+// App shell (index.html): network-first, fallback to cache
+// Everything else: network-first, fallback to cache
 
-  // For Firebase API calls — always go network, never cache
-  if(e.request.url.includes('firebasedatabase.app')){
+self.addEventListener('fetch', event => {
+  const url = new URL(event.request.url);
+
+  // 1. Firebase REST & SSE — always go to network, never cache
+  if (
+    url.hostname.includes('firebasedatabase.app') ||
+    url.hostname.includes('firebaseio.com')
+  ) {
+    event.respondWith(fetch(event.request));
     return;
   }
 
-  e.respondWith(
-    fetch(e.request)
-      .then(function(response){
-        // Cache fresh copy of valid responses
-        if(response && response.status === 200){
-          var copy = response.clone();
-          caches.open(CACHE).then(function(cache){
-            cache.put(e.request, copy);
-          });
+  // 2. Google Fonts — cache-first (fonts don't change)
+  if (
+    url.hostname === 'fonts.googleapis.com' ||
+    url.hostname === 'fonts.gstatic.com'
+  ) {
+    event.respondWith(
+      caches.match(event.request).then(cached => {
+        if (cached) return cached;
+        return fetch(event.request).then(response => {
+          if (response && response.status === 200) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+          }
+          return response;
+        });
+      })
+    );
+    return;
+  }
+
+  // 3. ui-avatars (icons) — cache-first
+  if (url.hostname === 'ui-avatars.com') {
+    event.respondWith(
+      caches.match(event.request).then(cached => {
+        if (cached) return cached;
+        return fetch(event.request).then(response => {
+          if (response && response.status === 200) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+          }
+          return response;
+        });
+      })
+    );
+    return;
+  }
+
+  // 4. App shell (index.html, manifest.json) — network-first, fallback to cache
+  if (
+    url.pathname.endsWith('index.html') ||
+    url.pathname.endsWith('manifest.json') ||
+    url.pathname === '/' ||
+    url.pathname.endsWith('/')
+  ) {
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          if (response && response.status === 200) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+          }
+          return response;
+        })
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
+  // 5. Everything else — network-first, fallback to cache
+  event.respondWith(
+    fetch(event.request)
+      .then(response => {
+        if (response && response.status === 200 && event.request.method === 'GET') {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
         }
         return response;
       })
-      .catch(function(){
-        // Network failed — serve from cache
-        return caches.match(e.request).then(function(cached){
-          return cached || caches.match('./index.html');
-        });
-      })
+      .catch(() => caches.match(event.request))
   );
 });
