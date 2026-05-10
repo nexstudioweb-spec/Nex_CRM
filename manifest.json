@@ -1,37 +1,26 @@
 {
-  "name": "Nex CRM — Caller Management",
-  "short_name": "Nex CRM",
-  "description": "Nex Studio Caller Management System",
+  "name": "Nex CRM v4.2",
+  "short_name": "NexCRM",
+  "description": "Nex Studio Caller CRM — lead management and telecalling",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
+  "orientation": "any",
   "background_color": "#0a0b0f",
   "theme_color": "#0a0b0f",
-  "orientation": "any",
-  "scope": "./",
   "icons": [
     {
-      "src": "icon-192.png",
+      "src": "https://ui-avatars.com/api/?name=N&background=ffffff&color=0a0b0f&size=192",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
-      "src": "icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "icon-512.png",
+      "src": "https://ui-avatars.com/api/?name=N&background=ffffff&color=0a0b0f&size=512",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     }
-  ]
+  ],
+  "categories": ["business", "productivity"]
 }
